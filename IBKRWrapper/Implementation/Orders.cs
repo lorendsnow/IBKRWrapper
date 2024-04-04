@@ -7,86 +7,90 @@ namespace IBKRWrapper
 {
     public partial class Wrapper : EWrapper
     {
-        private Dictionary<OrderKey, Trade> _trades = [];
-        private List<Trade>? _openOrdersResults = null;
-        private Dictionary<string, TaskCompletionSource<List<Trade>>> _openOrdersTcs = [];
-        private List<(Contract, Execution)>? _execDetailsResults = null;
-        private Dictionary<int, TaskCompletionSource<List<(Contract, Execution)>>> _execDetailsTcs =
-            [];
-        public event EventHandler<IBKRFillEventArgs>? IBKRFillEvent;
-        public event EventHandler<IBKROrderStatusEventArgs>? IBKROrderStatusEvent;
-        public event EventHandler<IBKRCommissionEventArgs>? IBKRCommissionEvent;
+        private readonly object openOrderLock = new();
+        private readonly object orderIdLock = new();
 
-        /// <summary>
-        /// Place an order with IBKR.
-        /// </summary>
-        /// <param name="contract">IBKR contract object.</param>
-        /// <param name="order">IBKR order object.</param>
-        /// <returns><see cref="Trade"/></returns>
-        public Trade PlaceOrder(Contract contract, Order order)
+        public Task<Trade> PlaceOrderAsync(Contract contract, Order order)
         {
+            TaskCompletionSource<Trade> tcs = new();
+
+            lock (orderIdLock)
+            {
+                while (!ValidOrderId) { }
+                ;
+                int orderId = NextOrderId;
+                ValidOrderId = false;
+                Trade trade = new(orderId, contract, order);
+
+                OrderStatusEvent += trade.HandleOrderStatus;
+                ExecDetailsEvent += trade.HandleExecution;
+                CommissionEvent += trade.HandleCommission;
+
+                EventHandler<OrderStatusEventArgs> statusUpdate =
+                    new(
+                        (sender, e) =>
+                        {
+                            if (e.OrderStatus.Accepted && e.OrderStatus.OrderId == orderId)
+                            {
+                                tcs.SetResult(trade);
+                            }
+                            else if (e.OrderStatus.Canceled && e.OrderStatus.OrderId == orderId)
+                            {
+                                tcs.SetCanceled();
+                            }
+                        }
+                    );
+
+                OrderStatusEvent += statusUpdate;
+
+                tcs.Task.ContinueWith(t => OrderStatusEvent -= statusUpdate);
+            }
             clientSocket.reqIds(1);
-            while (!OrderIdIsValid) { }
-            int orderId = NextOrderId;
-
-            Trade trade = new(orderId, contract, order);
-            IBKRFillEvent += trade.HandleFill;
-            IBKROrderStatusEvent += trade.HandleOrderStatus;
-            IBKRCommissionEvent += trade.HandleCommission;
-
-            OrderKey key =
-                new()
-                {
-                    ClientId = order.ClientId,
-                    OrderId = orderId,
-                    PermId = order.PermId
-                };
-            _trades.Add(key, trade);
-
-            clientSocket.placeOrder(orderId, contract, order);
-            OrderIdIsValid = false;
-            return trade;
+            return tcs.Task;
         }
 
-        /// <summary>
-        /// Cancel a pending order with IBKR.
-        /// </summary>
-        /// <param name="order">Order to be canceled.</param>
         public void CancelOrder(Order order)
         {
             clientSocket.cancelOrder(order.OrderId, DateTimeOffset.Now.ToString());
         }
 
-        /// <summary>
-        /// Get open orders from IBKR.
-        /// </summary>
-        /// <returns>List of <see cref="Trade"/> objects.</returns>
-        public Task<List<Trade>> GetOpenOrdersAsync()
+        public Task<List<OpenOrderEventArgs>> GetOpenOrdersAsync()
         {
-            _openOrdersResults = [];
-            TaskCompletionSource<List<Trade>> tcs = new();
-            _openOrdersTcs.Add("openOrders", tcs);
+            lock (openOrderLock)
+            {
+                List<OpenOrderEventArgs> orders = [];
+                TaskCompletionSource<List<OpenOrderEventArgs>> tcs = new();
+                EventHandler<OpenOrderEventArgs> addOrder =
+                    new(
+                        (sender, e) =>
+                        {
+                            orders.Add(e);
+                        }
+                    );
+                EventHandler orderEnd =
+                    new(
+                        (sender, e) =>
+                        {
+                            tcs.SetResult(orders);
+                        }
+                    );
 
-            clientSocket.reqOpenOrders();
+                OpenOrderEvent += addOrder;
+                OpenOrderEndEvent += orderEnd;
 
-            return tcs.Task;
+                tcs.Task.ContinueWith(t =>
+                {
+                    OpenOrderEvent -= addOrder;
+                    OpenOrderEndEvent -= orderEnd;
+                });
+
+                clientSocket.reqAllOpenOrders();
+
+                return tcs.Task;
+            }
         }
 
-        /// <summary>
-        /// Get executions for this session from IBKR.
-        /// </summary>
-        /// <returns>List of tuples of <see cref="Contract"/> and <see cref="Execution"/> objects.</returns>
-        public Task<List<(Contract, Execution)>> GetExecutionsAsync()
-        {
-            int reqId = _reqId++;
-            _execDetailsResults = [];
-            TaskCompletionSource<List<(Contract, Execution)>> tcs = new();
-            _execDetailsTcs.Add(reqId, tcs);
-
-            clientSocket.reqExecutions(reqId, new ExecutionFilter());
-
-            return tcs.Task;
-        }
+        public event EventHandler<OrderStatusEventArgs>? OrderStatusEvent;
 
         public void orderStatus(
             int orderId,
@@ -102,8 +106,9 @@ namespace IBKRWrapper
             double mktCapPrice
         )
         {
-            OnIBKROrderStatusEvent(
-                new IBKROrderStatusEventArgs(
+            OrderStatusEvent?.Invoke(
+                this,
+                new OrderStatusEventArgs(
                     new OrderStatus(
                         orderId,
                         status,
@@ -119,85 +124,42 @@ namespace IBKRWrapper
             );
         }
 
+        public event EventHandler<OpenOrderEventArgs>? OpenOrderEvent;
+
         public void openOrder(int orderId, Contract contract, Order order, OrderState orderState)
         {
-            OrderKey key =
-                new()
-                {
-                    ClientId = order.ClientId,
-                    OrderId = orderId,
-                    PermId = order.PermId
-                };
-
-            Trade trade = new(orderId, contract, order);
-
-            if (!_trades.TryAdd(key, trade))
-            {
-                _trades[key].Order.PermId = order.PermId;
-                _trades[key].Order.TotalQuantity = order.TotalQuantity;
-                _trades[key].Order.LmtPrice = order.LmtPrice;
-                _trades[key].Order.AuxPrice = order.AuxPrice;
-                _trades[key].Order.OrderType = order.OrderType;
-                _trades[key].Order.OrderRef = order.OrderRef;
-            }
-            IBKROrderStatusEvent += trade.HandleOrderStatus;
-            IBKRFillEvent += trade.HandleFill;
-            IBKRCommissionEvent += trade.HandleCommission;
-
-            _openOrdersResults?.Add(_trades[key]);
+            OpenOrderEvent?.Invoke(
+                this,
+                new OpenOrderEventArgs(orderId, contract, order, orderState)
+            );
         }
+
+        public event EventHandler? OpenOrderEndEvent;
 
         public void openOrderEnd()
         {
-            if (_openOrdersResults is null)
-            {
-                return;
-            }
-            List<Trade> results = _openOrdersResults;
-            _openOrdersTcs["openOrders"].SetResult(results);
-            _openOrdersResults = null;
-            _openOrdersTcs.Clear();
+            OpenOrderEndEvent?.Invoke(this, new EventArgs());
         }
+
+        public event EventHandler<CommissionEventArgs>? CommissionEvent;
 
         public void commissionReport(CommissionReport commissionReport)
         {
-            OnIBKRCommissionEvent(new IBKRCommissionEventArgs(commissionReport));
+            CommissionEvent?.Invoke(this, new CommissionEventArgs(commissionReport));
         }
+
+        public event EventHandler<ExecDetailsEventArgs>? ExecDetailsEvent;
 
         public void execDetails(int reqId, Contract contract, Execution execution)
         {
-            if (_execDetailsTcs.ContainsKey(reqId) && _execDetailsResults is not null)
-            // We're responding to GetExecutionsAsync so save the results
-            {
-                _execDetailsResults.Add((contract, execution));
-            }
-
-            OnIBKRFillEvent(new IBKRFillEventArgs(contract, execution));
+            ExecDetailsEvent?.Invoke(this, new ExecDetailsEventArgs(reqId, contract, execution));
         }
+
+        public event EventHandler<ExecDetailsEndEventArgs>? ExecDetailsEndEvent;
 
         public void execDetailsEnd(int reqId)
         {
-            if (_execDetailsTcs.ContainsKey(reqId) && _execDetailsResults is not null)
-            {
-                _execDetailsTcs[reqId].SetResult(_execDetailsResults);
-                _execDetailsResults = null;
-                _execDetailsTcs.Remove(reqId);
-            }
-        }
-
-        public void OnIBKRFillEvent(IBKRFillEventArgs e)
-        {
-            IBKRFillEvent?.Invoke(this, e);
-        }
-
-        public void OnIBKROrderStatusEvent(IBKROrderStatusEventArgs e)
-        {
-            IBKROrderStatusEvent?.Invoke(this, e);
-        }
-
-        public void OnIBKRCommissionEvent(IBKRCommissionEventArgs e)
-        {
-            IBKRCommissionEvent?.Invoke(this, e);
+            ExecDetailsEndEvent?.Invoke(this, new ExecDetailsEndEventArgs(reqId));
         }
     }
 }

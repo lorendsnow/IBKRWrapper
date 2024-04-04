@@ -3,23 +3,14 @@ using IBKRWrapper.Events;
 
 namespace IBKRWrapper.Models
 {
-    /// <summary>
-    /// Represents a list of tick data received from IBKR, and holds the initial request details.
-    /// </summary>
     public class TickDataList
     {
         public int ReqId { get; set; }
         public required Contract Contract { get; set; }
         public required string TickType { get; set; }
 
-        /// <summary>
-        /// List of tick data received from IBKR.
-        /// </summary>
         public required List<TickData> Data { get; set; }
 
-        /// <summary>
-        /// Emits a tick upon receipt from IBKR.
-        /// </summary>
         public event EventHandler<NewTickEventArgs>? NewTickEvent;
 
         public void HandleNewTick(object? sender, IBKRTickEventArgs e)
@@ -43,9 +34,6 @@ namespace IBKRWrapper.Models
         }
     }
 
-    /// <summary>
-    /// Object representing a tick from IBKR.
-    /// </summary>
     public record TickData
     {
         public DateTimeOffset Time { get; init; }
@@ -60,16 +48,8 @@ namespace IBKRWrapper.Models
         public string? SpecialConditions { get; init; }
     }
 
-    /// <summary>
-    /// Contains a <see cref="TickData"/> object from IBKR.
-    /// </summary>
-    public class NewTickEventArgs : EventArgs
+    public class NewTickEventArgs(TickData tick) : EventArgs
     {
-        public NewTickEventArgs(TickData tick)
-        {
-            Tick = tick;
-        }
-
-        public TickData Tick { get; set; }
+        public TickData Tick { get; set; } = tick;
     }
 }

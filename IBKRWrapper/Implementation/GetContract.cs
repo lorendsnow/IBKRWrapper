@@ -1,29 +1,24 @@
 ﻿using IBApi;
+using IBKRWrapper.Events;
 
 namespace IBKRWrapper
 {
     public partial class Wrapper : EWrapper
     {
-        private Dictionary<int, List<Contract>> _contractDetailsResults = [];
-        private Dictionary<int, TaskCompletionSource<List<Contract>>> _contractDetailsTcs = [];
-
-        /// <summary>
-        /// Gets a fully qualified stock contract from the TWS server.
-        /// </summary>
-        /// <param name="symbol"></param>
-        /// <param name="exchange"></param>
-        /// <param name="currency"></param>
-        /// <returns></returns>
         public Task<List<Contract>> GetQualifiedStockContractAsync(
             string symbol,
             string exchange = "SMART",
             string currency = "USD"
         )
         {
-            int reqId = _reqId++;
-            _contractDetailsResults[reqId] = [];
+            int reqId;
+            lock (_reqIdLock)
+            {
+                reqId = _reqId++;
+            }
+
             TaskCompletionSource<List<Contract>> tcs = new();
-            _contractDetailsTcs.Add(reqId, tcs);
+            List<Contract> contracts = [];
 
             Contract contract =
                 new()
@@ -34,21 +29,50 @@ namespace IBKRWrapper
                     Currency = currency
                 };
 
+            EventHandler<ContractDetailsEventArgs> contractDetailsHandler =
+                new(
+                    (sender, e) =>
+                    {
+                        contracts.Add(e.Details.Contract);
+                    }
+                );
+            EventHandler<ContractDetailsEndEventArgs> contractDetailsEndHandler =
+                new(
+                    (sender, e) =>
+                    {
+                        if (e.ReqId == reqId)
+                        {
+                            tcs.SetResult(contracts);
+                        }
+                    }
+                );
+
+            tcs.Task.ContinueWith(t =>
+            {
+                ContractDetailsEvent -= contractDetailsHandler;
+                ContractDetailsEndEvent -= contractDetailsEndHandler;
+            });
+
             clientSocket.reqContractDetails(reqId, contract);
 
             return tcs.Task;
         }
 
+        public event EventHandler<ContractDetailsEventArgs>? ContractDetailsEvent;
+
         public void contractDetails(int reqId, ContractDetails contractDetails)
         {
-            _contractDetailsResults[reqId].Add(contractDetails.Contract);
+            ContractDetailsEvent?.Invoke(
+                this,
+                new ContractDetailsEventArgs(reqId, contractDetails)
+            );
         }
+
+        public event EventHandler<ContractDetailsEndEventArgs>? ContractDetailsEndEvent;
 
         public void contractDetailsEnd(int reqId)
         {
-            _contractDetailsTcs[reqId].SetResult(_contractDetailsResults[reqId]);
-            _contractDetailsResults.Remove(reqId);
-            _contractDetailsTcs.Remove(reqId);
+            ContractDetailsEndEvent?.Invoke(this, new ContractDetailsEndEventArgs(reqId));
         }
     }
 }

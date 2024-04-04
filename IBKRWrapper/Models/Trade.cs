@@ -3,12 +3,6 @@ using IBKRWrapper.Events;
 
 namespace IBKRWrapper.Models
 {
-    /// <summary>
-    /// Trade object representing an open order. Receives and holds order status, fill and commission events from IBKR.
-    /// </summary>
-    /// <param name="orderId"></param>
-    /// <param name="contract"></param>
-    /// <param name="order"></param>
     public class Trade(int orderId, Contract contract, Order order)
     {
         public int OrderId { get; set; } = orderId;
@@ -16,9 +10,10 @@ namespace IBKRWrapper.Models
         public Contract Contract { get; set; } = contract;
         public Order Order { get; set; } = order;
         public OrderStatus? OrderStatus { get; set; }
-        public Dictionary<string, Fill> Fills { get; set; } = [];
+        public List<Execution> Executions { get; set; } = [];
+        public List<CommissionReport> Commissions { get; set; } = [];
 
-        public void HandleOrderStatus(object? sender, IBKROrderStatusEventArgs e)
+        public void HandleOrderStatus(object? sender, OrderStatusEventArgs e)
         {
             if (e.OrderStatus.OrderId != OrderId && e.OrderStatus.PermId != PermId)
             {
@@ -27,22 +22,22 @@ namespace IBKRWrapper.Models
             OrderStatus = e.OrderStatus;
         }
 
-        public void HandleFill(object? sender, IBKRFillEventArgs e)
+        public void HandleExecution(object? sender, ExecDetailsEventArgs e)
         {
             if (e.Execution.OrderId != OrderId && e.Execution.PermId != PermId)
             {
                 return;
             }
-            Fills.Add(e.Execution.ExecId, new Fill(e.Contract, e.Execution));
+            Executions.Add(e.Execution);
         }
 
-        public void HandleCommission(object? sender, IBKRCommissionEventArgs e)
+        public void HandleCommission(object? sender, CommissionEventArgs e)
         {
-            if (!Fills.ContainsKey(e.CommissionReport.ExecId))
+            if (!Executions.Select(x => x.ExecId).ToArray().Contains(e.Commission.ExecId))
             {
                 return;
             }
-            Fills[e.CommissionReport.ExecId].Commission = e.CommissionReport.Commission;
+            Commissions.Add(e.Commission);
         }
 
         public bool IsDone()

@@ -5,12 +5,11 @@
         public static DateTimeOffset ParseIBDateTime(string timeString)
         {
             DateTimeOffset dtResult;
-            int i = 0;
             char[] chars = timeString.ToCharArray();
             switch (
                 (
                     timeString.Length,
-                    int.TryParse(timeString, out i),
+                    int.TryParse(timeString, out int i),
                     chars.Where(x => x.ToString() == " ").Count() >= 2,
                     chars.All(x => x.ToString() != "  ")
                 )
@@ -51,12 +50,17 @@
                     }
                     else
                     {
-                        DateTime raw;
-                        DateTime.TryParse(timeString, out raw);
-                        dtResult = new DateTimeOffset(
-                            raw.ToLocalTime(),
-                            TimeZoneInfo.Local.BaseUtcOffset
-                        );
+                        if (DateTime.TryParse(timeString, out DateTime raw))
+                        {
+                            dtResult = new DateTimeOffset(
+                                raw.ToLocalTime(),
+                                TimeZoneInfo.Local.BaseUtcOffset
+                            );
+                        }
+                        else
+                        {
+                            dtResult = new DateTimeOffset();
+                        }
                     }
                     break;
             }
@@ -73,9 +77,12 @@
 
         private static TimeOnly ParseTimeString(string str)
         {
-            TimeOnly result;
-            TimeOnly.TryParse(str, out result);
-            return result;
+            if (TimeOnly.TryParse(str, out TimeOnly result))
+                return result;
+            else
+            {
+                return new TimeOnly();
+            }
         }
     }
 }

@@ -8,15 +8,8 @@ namespace IBKRWrapper
     {
         private TaskCompletionSource<string>? _paramsTcs = null;
 
-        /// <summary>
-        /// Emits the req ID, rank and <see cref="IBApi.Contract"/> for scanner data results received from IBKR.
-        /// </summary>
         public event EventHandler<IBKRScannerDataEventArgs>? IBKRScannerDataEvent;
 
-        /// <summary>
-        /// Request all of the valid scanner parameters.
-        /// </summary>
-        /// <returns>XML list of valid scanner parameters.</returns>
         public Task<string> GetScannerParametersAsync()
         {
             _paramsTcs = new();
@@ -24,14 +17,6 @@ namespace IBKRWrapper
             return _paramsTcs.Task;
         }
 
-        /// <summary>
-        /// Request a scanner subscription.
-        /// </summary>
-        /// <param name="instrument">Instrument type to use (ScanParameterResponse::InstrumentList::Instrument::type).</param>
-        /// <param name="location">Country or region for scanner to search (ScanParameterResponse::LocationTree::Location::LocationTree::Location::locationCode).</param>
-        /// <param name="scanCode">Value for scanner to sort by (ScanParameterResponse::ScanTypeList::ScanType::scanCode).</param>
-        /// <param name="filterOptions">Dictionary of options to filter the results(ScanParameterResponse::FilterList::RangeFilter::AbstractField::code).</param>
-        /// <returns><see cref="ScannerData"/> object which holds the request details and will receive scan results as received from IBKR.</returns>
         public ScannerData GetScannerData(
             string instrument,
             string location,
@@ -56,27 +41,23 @@ namespace IBKRWrapper
             return scannerData;
         }
 
-        /// <summary>
-        /// Cancel a scanner subscription.
-        /// </summary>
-        /// <param name="scannerData"></param>
         public void CancelScannerSubscription(ScannerData scannerData)
         {
             IBKRScannerDataEvent -= scannerData.HandleScannerData;
             clientSocket.cancelScannerSubscription(scannerData.ReqId);
         }
 
-        private List<TagValue> MakeFilterOptions(Dictionary<string, string> filterOptions)
+        private static List<TagValue> MakeFilterOptions(Dictionary<string, string> filterOptions)
         {
             List<TagValue> tagValues = [];
             foreach (KeyValuePair<string, string> option in filterOptions)
             {
-                tagValues.Append(new TagValue() { Tag = option.Key, Value = option.Value });
+                tagValues.Add(new TagValue() { Tag = option.Key, Value = option.Value });
             }
             return tagValues;
         }
 
-        private ScannerSubscription MakeScannerSubscription(
+        private static ScannerSubscription MakeScannerSubscription(
             string instrument,
             string location,
             string scanCode

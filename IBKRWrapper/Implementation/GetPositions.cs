@@ -1,51 +1,63 @@
 ﻿using IBApi;
+using IBKRWrapper.Events;
 using IBKRWrapper.Models;
 
 namespace IBKRWrapper
 {
     public partial class Wrapper : EWrapper
     {
-        private List<(Contract, decimal, double, string)>? _positionsResults = null;
-        private Dictionary<string, TaskCompletionSource<List<Position>>> _positionsTcs = [];
+        private readonly object positionsLock = new();
 
-        /// <summary>
-        /// Gets a list of positions from the TWS server.
-        /// </summary>
-        /// <param name="account"></param>
-        /// <returns></returns>
-        public Task<List<Position>> GetPositionsAsync(string account)
+        public Task<List<Position>> GetPositionsAsync()
         {
-            _positionsResults = [];
             TaskCompletionSource<List<Position>> tcs = new();
-            _positionsTcs.Add(account, tcs);
 
-            clientSocket.reqPositions();
+            lock (positionsLock)
+            {
+                List<Position> positions = [];
 
-            return tcs.Task;
+                EventHandler<PositionEventArgs> positionHandler =
+                    new(
+                        (sender, e) =>
+                        {
+                            positions.Add(e.Position);
+                        }
+                    );
+                EventHandler positionEnd =
+                    new(
+                        (sender, e) =>
+                        {
+                            tcs.SetResult(positions);
+                        }
+                    );
+
+                PositionEvent += positionHandler;
+                PositionEndEvent += positionEnd;
+
+                tcs.Task.ContinueWith(t =>
+                {
+                    PositionEvent -= positionHandler;
+                    PositionEndEvent -= positionEnd;
+                });
+
+                clientSocket.reqPositions();
+
+                return tcs.Task;
+            }
         }
+
+        public event EventHandler<PositionEventArgs>? PositionEvent;
 
         public void position(string account, Contract contract, decimal pos, double avgCost)
         {
-            if (_positionsResults != null)
-            {
-                _positionsResults.Add((contract, pos, avgCost, account));
-            }
+            PositionEvent?.Invoke(
+                this,
+                new PositionEventArgs(new Position(account, contract, pos, avgCost))
+            );
         }
 
-        public void positionEnd()
-        {
-            if (_positionsResults is null)
-            {
-                return;
-            }
-            List<Position> positions = _positionsResults
-                .Where(x => x.Item4 == _positionsTcs.Keys.First())
-                .Select(x => PositionBuilder.Build(x.Item1, x.Item2, x.Item3, x.Item4))
-                .ToList();
+        public event EventHandler? PositionEndEvent;
 
-            _positionsTcs[_positionsTcs.Keys.First()].SetResult(positions);
-            _positionsResults = null;
-            _positionsTcs.Remove(_positionsTcs.Keys.First());
-        }
+        public void positionEnd() => PositionEndEvent?.Invoke(this, new EventArgs());
     }
 }
