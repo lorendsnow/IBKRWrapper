@@ -13,39 +13,38 @@ namespace IBKRWrapper
         public Task<Trade> PlaceOrderAsync(Contract contract, Order order)
         {
             TaskCompletionSource<Trade> tcs = new();
+            int orderId;
 
             lock (orderIdLock)
             {
-                while (!ValidOrderId) { }
-                ;
-                int orderId = NextOrderId;
-                ValidOrderId = false;
-                Trade trade = new(orderId, contract, order);
-
-                OrderStatusEvent += trade.HandleOrderStatus;
-                ExecDetailsEvent += trade.HandleExecution;
-                CommissionEvent += trade.HandleCommission;
-
-                EventHandler<OrderStatusEventArgs> statusUpdate =
-                    new(
-                        (sender, e) =>
-                        {
-                            if (e.OrderStatus.Accepted && e.OrderStatus.OrderId == orderId)
-                            {
-                                tcs.SetResult(trade);
-                            }
-                            else if (e.OrderStatus.Canceled && e.OrderStatus.OrderId == orderId)
-                            {
-                                tcs.SetCanceled();
-                            }
-                        }
-                    );
-
-                OrderStatusEvent += statusUpdate;
-
-                tcs.Task.ContinueWith(t => OrderStatusEvent -= statusUpdate);
+                orderId = NextOrderId++;
             }
-            clientSocket.reqIds(1);
+
+            Trade trade = new(orderId, contract, order);
+
+            OrderStatusEvent += trade.HandleOrderStatus;
+            ExecDetailsEvent += trade.HandleExecution;
+            CommissionEvent += trade.HandleCommission;
+
+            EventHandler<OrderStatusEventArgs> statusUpdate =
+                new(
+                    (sender, e) =>
+                    {
+                        if (e.OrderStatus.OrderId == orderId && e.OrderStatus.Accepted)
+                        {
+                            tcs.SetResult(trade);
+                        }
+                        else if (e.OrderStatus.OrderId == orderId && e.OrderStatus.Canceled)
+                        {
+                            tcs.SetCanceled();
+                        }
+                    }
+                );
+
+            OrderStatusEvent += statusUpdate;
+
+            tcs.Task.ContinueWith(t => OrderStatusEvent -= statusUpdate);
+
             return tcs.Task;
         }
 
