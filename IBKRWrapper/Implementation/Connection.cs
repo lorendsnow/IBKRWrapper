@@ -38,8 +38,6 @@ namespace IBKRWrapper
         {
             clientSocket.eConnect(host, port, clientId);
 
-            while (NextOrderId <= 0) { }
-
             EReader reader = new(clientSocket, Signal);
             reader.Start();
 
