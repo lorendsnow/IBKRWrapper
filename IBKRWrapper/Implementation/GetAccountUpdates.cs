@@ -46,16 +46,16 @@ namespace IBKRWrapper
 
         public Task<Dictionary<string, string>> GetAccountValuesAsync(string account)
         {
+            TaskCompletionSource<Dictionary<string, string>> tcs = new();
             lock (accountValuesLock)
             {
                 Dictionary<string, string> accountValues = [];
-                TaskCompletionSource<Dictionary<string, string>> tcs = new();
 
                 EventHandler<UpdateAccountValueEventArgs> updateAccountValueHandler =
                     new(
                         (sender, e) =>
                         {
-                            if (e.AccountName == account)
+                            if (e.AccountName == account && e.Currency == "USD")
                             {
                                 accountValues.Add(e.Key, e.Value);
                             }
@@ -82,9 +82,8 @@ namespace IBKRWrapper
                 });
 
                 clientSocket.reqAccountUpdates(true, account);
-
-                return tcs.Task;
             }
+            return tcs.Task;
         }
 
         public event EventHandler<UpdatePortfolioEventArgs>? UpdatePortfolioEvent;
