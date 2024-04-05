@@ -20,7 +20,7 @@ namespace IBKRWrapper
                 orderId = NextOrderId++;
             }
 
-            Trade trade = new(orderId, contract, order);
+            Trade trade = new(orderId, contract, order, null);
 
             OrderStatusEvent += trade.HandleOrderStatus;
             ExecDetailsEvent += trade.HandleExecution;
@@ -44,6 +44,8 @@ namespace IBKRWrapper
             OrderStatusEvent += statusUpdate;
 
             tcs.Task.ContinueWith(t => OrderStatusEvent -= statusUpdate);
+
+            clientSocket.placeOrder(orderId, contract, order);
 
             return tcs.Task;
         }
@@ -80,6 +82,42 @@ namespace IBKRWrapper
                 tcs.Task.ContinueWith(t =>
                 {
                     OpenOrderEvent -= addOrder;
+                    OpenOrderEndEvent -= orderEnd;
+                });
+
+                clientSocket.reqAllOpenOrders();
+
+                return tcs.Task;
+            }
+        }
+
+        public Task<List<Trade>> GetOpenOrdersAsTradesAsync()
+        {
+            lock (openOrderLock)
+            {
+                List<Trade> trades = [];
+                TaskCompletionSource<List<Trade>> tcs = new();
+                EventHandler<OpenOrderEventArgs> handler =
+                    new(
+                        (sender, e) =>
+                        {
+                            trades.Add(new(e.OrderId, e.Contract, e.Order, e.OrderState.Status));
+                        }
+                    );
+                EventHandler orderEnd =
+                    new(
+                        (sender, e) =>
+                        {
+                            tcs.SetResult(trades);
+                        }
+                    );
+
+                OpenOrderEvent += handler;
+                OpenOrderEndEvent += orderEnd;
+
+                tcs.Task.ContinueWith(t =>
+                {
+                    OpenOrderEvent -= handler;
                     OpenOrderEndEvent -= orderEnd;
                 });
 
