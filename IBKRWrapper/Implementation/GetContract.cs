@@ -33,7 +33,10 @@ namespace IBKRWrapper
                 new(
                     (sender, e) =>
                     {
-                        contracts.Add(e.Details.Contract);
+                        if (e.ReqId == reqId)
+                        {
+                            contracts.Add(e.Details.Contract);
+                        }
                     }
                 );
             EventHandler<ContractDetailsEndEventArgs> contractDetailsEndHandler =
@@ -46,6 +49,9 @@ namespace IBKRWrapper
                         }
                     }
                 );
+
+            ContractDetailsEvent += contractDetailsHandler;
+            ContractDetailsEndEvent += contractDetailsEndHandler;
 
             tcs.Task.ContinueWith(t =>
             {
