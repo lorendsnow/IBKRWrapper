@@ -3,34 +3,50 @@ using IBKRWrapper.Events;
 
 namespace IBKRWrapper.Models
 {
-    public class TickDataList
+    public class TickDataList(int reqId, Contract contract, string tickType)
     {
-        public int ReqId { get; set; }
-        public required Contract Contract { get; set; }
-        public required string TickType { get; set; }
+        public int ReqId { get; init; } = reqId;
+        public Contract Contract { get; init; } = contract;
+        public string TickType { get; init; } = tickType;
 
-        public required List<TickData> Data { get; set; }
+        public List<TickData> Data { get; set; } = [];
 
         public event EventHandler<NewTickEventArgs>? NewTickEvent;
 
-        public void HandleNewTick(object? sender, IBKRTickEventArgs e)
+        public void HandleNewTick(object? sender, TickByTickEventArgs e)
         {
             if (e.ReqId != ReqId)
             {
                 return;
             }
-            OnNewTick(e.TickData);
-            Data.Add(e.TickData);
-        }
 
-        public void OnNewTick(TickData tick)
-        {
-            NewTickEvent?.Invoke(this, new NewTickEventArgs(tick));
+            NewTickEvent?.Invoke(this, new NewTickEventArgs(e.TickData));
+            Data.Add(e.TickData);
         }
 
         public void CancelTickData(Wrapper wrapper)
         {
             wrapper.ClientSocket.cancelTickByTickData(ReqId);
+        }
+
+        public override string ToString()
+        {
+            return (
+                $"TickDataList(ReqId={ReqId}, "
+                + $"Contract={ContractString(Contract)}, "
+                + $"TickType={TickType}, "
+                + $"Data=[{string.Join(", ", Data.Select(x => x.ToString()).ToArray())}])"
+            );
+        }
+
+        private static string ContractString(Contract contract)
+        {
+            return (
+                $"Contract(Ticker={contract.Symbol}, "
+                + $"Type={contract.SecType}, "
+                + $"Exchange={contract.Exchange}, "
+                + $"PrimaryExchange={contract.PrimaryExch})"
+            );
         }
     }
 
@@ -50,6 +66,6 @@ namespace IBKRWrapper.Models
 
     public class NewTickEventArgs(TickData tick) : EventArgs
     {
-        public TickData Tick { get; set; } = tick;
+        public TickData Tick { get; private set; } = tick;
     }
 }

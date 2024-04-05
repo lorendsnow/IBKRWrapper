@@ -6,16 +6,6 @@ namespace IBKRWrapper
 {
     public partial class Wrapper : EWrapper
     {
-        public event EventHandler<IBKRrtBarEventArgs>? IBKRrtBarEvent;
-
-        /// <summary>
-        /// Get streaming real-time (5-second) bars for a given contract.
-        /// </summary>
-        /// <param name="contract"></param>
-        /// <param name="barSize"></param>
-        /// <param name="whatToShow"></param>
-        /// <param name="useRTH"></param>
-        /// <returns><see cref="RealTimeBarList"/> - holds the request information and a list of bars received.</returns>
         public RealTimeBarList GetRealTimeBars(
             Contract contract,
             int barSize,
@@ -23,23 +13,22 @@ namespace IBKRWrapper
             bool useRTH
         )
         {
-            int reqId = _reqId++;
-            RealTimeBarList rtBars =
-                new()
-                {
-                    ReqId = reqId,
-                    Contract = contract,
-                    BarSize = barSize,
-                    WhatToShow = whatToShow,
-                    UseRTH = useRTH
-                };
+            int reqId;
+            lock (_reqIdLock)
+            {
+                reqId = _reqId++;
+            }
 
-            IBKRrtBarEvent += rtBars.HandleNewBar;
+            RealTimeBarList rtBars = new(reqId, contract, barSize, whatToShow, useRTH);
+
+            RealTimeBarEvent += rtBars.HandleNewBar;
 
             clientSocket.reqRealTimeBars(reqId, contract, barSize, whatToShow, useRTH, null);
 
             return rtBars;
         }
+
+        public event EventHandler<RealTimeBarEventArgs>? RealTimeBarEvent;
 
         public virtual void realtimeBar(
             int reqId,
@@ -54,26 +43,9 @@ namespace IBKRWrapper
         )
         {
             DateTimeOffset convertedTime = DateTimeOffset.FromUnixTimeSeconds(time);
-            RealTimeBar bar =
-                new()
-                {
-                    TimeOffset = convertedTime,
-                    Open = open,
-                    High = high,
-                    Low = low,
-                    Close = close,
-                    Volume = volume,
-                    WAP = WAP,
-                    Count = count
-                };
+            RealTimeBar bar = new(convertedTime, open, high, low, close, volume, WAP, count);
 
-            IBKRrtBarEventArgs e = new(reqId, bar);
-            OnIBKRrtBarEvent(e);
-        }
-
-        public void OnIBKRrtBarEvent(IBKRrtBarEventArgs e)
-        {
-            IBKRrtBarEvent?.Invoke(this, e);
+            RealTimeBarEvent?.Invoke(this, new RealTimeBarEventArgs(reqId, bar));
         }
     }
 }

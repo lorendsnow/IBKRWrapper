@@ -6,15 +6,33 @@ namespace IBKRWrapper
 {
     public partial class Wrapper : EWrapper
     {
-        private TaskCompletionSource<string>? _paramsTcs = null;
-
-        public event EventHandler<IBKRScannerDataEventArgs>? IBKRScannerDataEvent;
+        private readonly object _scannerParamLock = new();
 
         public Task<string> GetScannerParametersAsync()
         {
-            _paramsTcs = new();
-            clientSocket.reqScannerParameters();
-            return _paramsTcs.Task;
+            lock (_scannerParamLock)
+            {
+                TaskCompletionSource<string> tcs = new();
+
+                EventHandler<ScannerParametersEventArgs> handler =
+                    new(
+                        (sender, e) =>
+                        {
+                            tcs.SetResult(e.XML);
+                        }
+                    );
+
+                ScannerParametersEvent += handler;
+
+                tcs.Task.ContinueWith(t =>
+                {
+                    ScannerParametersEvent -= handler;
+                });
+
+                clientSocket.reqScannerParameters();
+
+                return tcs.Task;
+            }
         }
 
         public ScannerData GetScannerData(
@@ -24,7 +42,12 @@ namespace IBKRWrapper
             Dictionary<string, string>? filterOptions
         )
         {
-            int reqId = _reqId++;
+            int reqId;
+            lock (_reqIdLock)
+            {
+                reqId = _reqId++;
+            }
+
             ScannerSubscription scannerSub = MakeScannerSubscription(
                 instrument,
                 location,
@@ -34,7 +57,7 @@ namespace IBKRWrapper
                 filterOptions != null ? MakeFilterOptions(filterOptions) : [];
 
             ScannerData scannerData = new(reqId, scannerSub, tagValues);
-            IBKRScannerDataEvent += scannerData.HandleScannerData;
+            ScannerDataEvent += scannerData.HandleScannerData;
 
             clientSocket.reqScannerSubscription(reqId, scannerSub, null, tagValues);
 
@@ -43,7 +66,7 @@ namespace IBKRWrapper
 
         public void CancelScannerSubscription(ScannerData scannerData)
         {
-            IBKRScannerDataEvent -= scannerData.HandleScannerData;
+            ScannerDataEvent -= scannerData.HandleScannerData;
             clientSocket.cancelScannerSubscription(scannerData.ReqId);
         }
 
@@ -71,13 +94,13 @@ namespace IBKRWrapper
             };
         }
 
+        public event EventHandler<ScannerDataEventArgs>? ScannerDataEvent;
+
+        public event EventHandler<ScannerParametersEventArgs>? ScannerParametersEvent;
+
         public void scannerParameters(string xml)
         {
-            if (_paramsTcs == null)
-                return;
-
-            _paramsTcs.SetResult(xml);
-            _paramsTcs = null;
+            ScannerParametersEvent?.Invoke(this, new ScannerParametersEventArgs(xml));
         }
 
         public virtual void scannerData(
@@ -90,12 +113,10 @@ namespace IBKRWrapper
             string legsStr
         )
         {
-            OnScannerData(reqId, rank, contractDetails.Contract);
-        }
-
-        private void OnScannerData(int reqId, int rank, Contract contract)
-        {
-            IBKRScannerDataEvent?.Invoke(this, new IBKRScannerDataEventArgs(reqId, rank, contract));
+            ScannerDataEvent?.Invoke(
+                this,
+                new ScannerDataEventArgs(reqId, rank, contractDetails.Contract)
+            );
         }
     }
 }

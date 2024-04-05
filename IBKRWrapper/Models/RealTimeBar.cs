@@ -3,47 +3,70 @@ using IBKRWrapper.Events;
 
 namespace IBKRWrapper.Models
 {
-    public class RealTimeBarList
+    public class RealTimeBarList(
+        int reqId,
+        Contract contract,
+        int barSize,
+        string whatToShow,
+        bool useRTH
+    )
     {
-        public List<RealTimeBar> Bars { get; set; } = [];
-        public int ReqId { get; init; }
-        public required Contract Contract { get; init; }
-        public int BarSize { get; init; } = 5;
-        public required string WhatToShow { get; init; }
-        public bool UseRTH { get; init; }
+        public List<RealTimeBar> Bars { get; private set; } = [];
+        public int ReqId { get; init; } = reqId;
+        public Contract Contract { get; init; } = contract;
+        public int BarSize { get; init; } = barSize;
+        public string WhatToShow { get; init; } = whatToShow;
+        public bool UseRTH { get; init; } = useRTH;
 
         public event EventHandler<NewBarEventArgs>? NewBarEvent;
 
-        public void HandleNewBar(object? sender, IBKRrtBarEventArgs e)
+        public void HandleNewBar(object? sender, RealTimeBarEventArgs e)
         {
             if (e.ReqId != ReqId)
             {
                 return;
             }
-            OnNewBar(e.RealTimeBar);
+
+            NewBarEvent?.Invoke(this, new NewBarEventArgs(e.RealTimeBar));
             Bars.Add(e.RealTimeBar);
         }
 
-        public void OnNewBar(RealTimeBar bar)
+        public override string ToString()
         {
-            NewBarEvent?.Invoke(this, new NewBarEventArgs(bar));
+            return (
+                $"RealTimeBarList(ReqId={ReqId}, "
+                + $"Contract={ContractString(Contract)}, "
+                + $"BarSize={BarSize}, "
+                + $"WhatToShow={WhatToShow}, "
+                + $"UseRTH={UseRTH}, "
+                + $"Bars=[{string.Join(", ", Bars.Select(x => x.ToString()).ToArray())}])"
+            );
+        }
+
+        private static string ContractString(Contract contract)
+        {
+            return (
+                $"Contract(Ticker={contract.Symbol}, "
+                + $"Type={contract.SecType}, "
+                + $"Exchange={contract.Exchange}, "
+                + $"PrimaryExchange={contract.PrimaryExch})"
+            );
         }
     }
 
-    public record RealTimeBar
-    {
-        public DateTimeOffset TimeOffset { get; init; }
-        public double Open { get; init; }
-        public double High { get; init; }
-        public double Low { get; init; }
-        public double Close { get; init; }
-        public decimal? Volume { get; init; }
-        public decimal? WAP { get; init; }
-        public int? Count { get; init; }
-    }
+    public record RealTimeBar(
+        DateTimeOffset Timeoffset,
+        double Open,
+        double High,
+        double Low,
+        double Close,
+        decimal? Volume,
+        decimal? Wap,
+        int? Count
+    );
 
     public class NewBarEventArgs(RealTimeBar bar) : EventArgs
     {
-        public RealTimeBar Bar { get; set; } = bar;
+        public RealTimeBar Bar { get; private set; } = bar;
     }
 }

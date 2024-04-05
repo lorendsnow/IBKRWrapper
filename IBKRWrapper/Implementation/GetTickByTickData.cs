@@ -6,34 +6,24 @@ namespace IBKRWrapper
 {
     public partial class Wrapper : EWrapper
     {
-        /// <summary>
-        /// Emits tick data when received from IBKR.
-        /// </summary>
-        public event EventHandler<IBKRTickEventArgs>? IBKRTickEvent;
-
-        /// <summary>
-        /// Request streaming tick-by-tick "Last" data for a given contract.
-        /// </summary>
-        /// <param name="contract"></param>
-        /// <returns><see cref="TickDataList"/> - holds request information and a list of ticks received from IBKR.</returns>
-        public TickDataList GetLastTicks(Contract contract)
+        public TickDataList GetTickByTickData(Contract contract, string tickType)
         {
-            int reqId = _reqId++;
-            TickDataList tickDataList =
-                new()
-                {
-                    ReqId = reqId,
-                    Contract = contract,
-                    TickType = "Last",
-                    Data = []
-                };
+            int reqId;
+            lock (_reqIdLock)
+            {
+                reqId = _reqId++;
+            }
 
-            IBKRTickEvent += tickDataList.HandleNewTick;
+            TickDataList tickDataList = new(reqId, contract, tickType);
 
-            clientSocket.reqTickByTickData(reqId, contract, "Last", 0, false);
+            TickByTickEvent += tickDataList.HandleNewTick;
+
+            clientSocket.reqTickByTickData(reqId, contract, tickType, 0, false);
 
             return tickDataList;
         }
+
+        public event EventHandler<TickByTickEventArgs>? TickByTickEvent;
 
         public void tickByTickAllLast(
             int reqId,
@@ -46,19 +36,16 @@ namespace IBKRWrapper
             string specialConditions
         )
         {
-            DateTimeOffset convertedTime = DateTimeOffset.FromUnixTimeSeconds(time);
-
-            TickData tick =
+            TickData tickData =
                 new()
                 {
-                    Time = convertedTime,
+                    Time = DateTimeOffset.FromUnixTimeSeconds(time),
                     Last = price,
                     LastSize = size,
                     Exchange = exchange,
                     SpecialConditions = specialConditions
                 };
-
-            OnIBKRTickEvent(new IBKRTickEventArgs(reqId, tick));
+            TickByTickEvent?.Invoke(this, new TickByTickEventArgs(reqId, tickData));
         }
 
         public void tickByTickBidAsk(
@@ -71,33 +58,25 @@ namespace IBKRWrapper
             TickAttribBidAsk tickAttribBidAsk
         )
         {
-            DateTimeOffset convertedTime = DateTimeOffset.FromUnixTimeSeconds(time);
-
-            TickData tick =
+            TickData tickData =
                 new()
                 {
-                    Time = convertedTime,
+                    Time = DateTimeOffset.FromUnixTimeSeconds(time),
                     Bid = bidPrice,
                     Ask = askPrice,
                     BidSize = bidSize,
                     AskSize = askSize
                 };
 
-            OnIBKRTickEvent(new IBKRTickEventArgs(reqId, tick));
+            TickByTickEvent?.Invoke(this, new TickByTickEventArgs(reqId, tickData));
         }
 
         public void tickByTickMidPoint(int reqId, long time, double midPoint)
         {
-            DateTimeOffset convertedTime = DateTimeOffset.FromUnixTimeSeconds(time);
+            TickData tickData =
+                new() { Time = DateTimeOffset.FromUnixTimeSeconds(time), Mid = midPoint };
 
-            TickData tick = new() { Time = convertedTime, Mid = midPoint };
-
-            OnIBKRTickEvent(new IBKRTickEventArgs(reqId, tick));
-        }
-
-        public void OnIBKRTickEvent(IBKRTickEventArgs e)
-        {
-            IBKRTickEvent?.Invoke(this, e);
+            TickByTickEvent?.Invoke(this, new TickByTickEventArgs(reqId, tickData));
         }
     }
 }

@@ -1,27 +1,11 @@
 ﻿using IBApi;
+using IBKRWrapper.Events;
 using IBKRWrapper.Utils;
 
 namespace IBKRWrapper
 {
     public partial class Wrapper : EWrapper
     {
-        private readonly Dictionary<int, List<Bar>> _barsResults = [];
-        private readonly Dictionary<int, TaskCompletionSource<List<Bar>>> _barsTcs = [];
-        private readonly Dictionary<int, TaskCompletionSource<DateTimeOffset>> _earliestDataTcs =
-        [];
-        private readonly Dictionary<
-            int,
-            TaskCompletionSource<List<HistoricalTickLast>>
-        > _lastTickTcs = [];
-        private readonly Dictionary<
-            int,
-            TaskCompletionSource<List<HistoricalTickBidAsk>>
-        > _bidAskTcs = [];
-        private readonly Dictionary<int, TaskCompletionSource<List<HistoricalTick>>> _midTcs = [];
-        private readonly Dictionary<int, List<HistoricalTickLast>> _lastTickResults = [];
-        private readonly Dictionary<int, List<HistoricalTickBidAsk>> _bidAskResults = [];
-        private readonly Dictionary<int, List<HistoricalTick>> _midResults = [];
-
         public Task<List<Bar>> GetHistoricalBarsAsync(
             Contract contract,
             string durationString,
@@ -32,10 +16,47 @@ namespace IBKRWrapper
             string endDateTime = ""
         )
         {
-            int reqId = _reqId++;
-            _barsResults[reqId] = [];
+            int reqId;
+            List<Bar> bars = [];
             TaskCompletionSource<List<Bar>> tcs = new();
-            _barsTcs.Add(reqId, tcs);
+
+            lock (_reqIdLock)
+            {
+                reqId = _reqId++;
+            }
+
+            EventHandler<HistoricalDataEventArgs> handler =
+                new(
+                    (sender, e) =>
+                    {
+                        if (e.ReqId != reqId)
+                        {
+                            return;
+                        }
+                        bars.Add(e.Bar);
+                    }
+                );
+
+            EventHandler<HistoricalDataEndEventArgs> endHandler =
+                new(
+                    (sender, e) =>
+                    {
+                        if (e.ReqId != reqId)
+                        {
+                            return;
+                        }
+                        tcs.SetResult(bars);
+                    }
+                );
+
+            HistoricalData += handler;
+            HistoricalDataEnd += endHandler;
+
+            tcs.Task.ContinueWith(t =>
+            {
+                HistoricalData -= handler;
+                HistoricalDataEnd -= endHandler;
+            });
 
             clientSocket.reqHistoricalData(
                 reqId,
@@ -61,10 +82,39 @@ namespace IBKRWrapper
             int useRth
         )
         {
-            int reqId = _reqId++;
-            _lastTickResults[reqId] = [];
+            int reqId;
+            List<HistoricalTickLast> ticks = [];
             TaskCompletionSource<List<HistoricalTickLast>> tcs = new();
-            _lastTickTcs.Add(reqId, tcs);
+
+            lock (_reqIdLock)
+            {
+                reqId = _reqId++;
+            }
+
+            EventHandler<HistoricalTicksLastEventArgs> handler =
+                new(
+                    (sender, e) =>
+                    {
+                        if (e.ReqId != reqId)
+                        {
+                            return;
+                        }
+
+                        ticks.AddRange(e.Ticks);
+
+                        if (e.Done)
+                        {
+                            tcs.SetResult(ticks);
+                        }
+                    }
+                );
+
+            HistoricalTicksLast += handler;
+
+            tcs.Task.ContinueWith(t =>
+            {
+                HistoricalTicksLast -= handler;
+            });
 
             clientSocket.reqHistoricalTicks(
                 reqId,
@@ -90,10 +140,39 @@ namespace IBKRWrapper
             bool ignoreSize
         )
         {
-            int reqId = _reqId++;
-            _bidAskResults[reqId] = [];
+            int reqId;
+            List<HistoricalTickBidAsk> ticks = [];
             TaskCompletionSource<List<HistoricalTickBidAsk>> tcs = new();
-            _bidAskTcs.Add(reqId, tcs);
+
+            lock (_reqIdLock)
+            {
+                reqId = _reqId++;
+            }
+
+            EventHandler<HistoricalTicksBidAskEventArgs> handler =
+                new(
+                    (sender, e) =>
+                    {
+                        if (e.ReqId != reqId)
+                        {
+                            return;
+                        }
+
+                        ticks.AddRange(e.Ticks);
+
+                        if (e.Done)
+                        {
+                            tcs.SetResult(ticks);
+                        }
+                    }
+                );
+
+            HistoricalTicksBidAsk += handler;
+
+            tcs.Task.ContinueWith(t =>
+            {
+                HistoricalTicksBidAsk -= handler;
+            });
 
             clientSocket.reqHistoricalTicks(
                 reqId,
@@ -118,10 +197,39 @@ namespace IBKRWrapper
             int useRth
         )
         {
-            int reqId = _reqId++;
-            _midResults[reqId] = [];
+            int reqId;
+            List<HistoricalTick> ticks = [];
             TaskCompletionSource<List<HistoricalTick>> tcs = new();
-            _midTcs.Add(reqId, tcs);
+
+            lock (_reqIdLock)
+            {
+                reqId = _reqId++;
+            }
+
+            EventHandler<HistoricalTicksMidEventArgs> handler =
+                new(
+                    (sender, e) =>
+                    {
+                        if (e.ReqId != reqId)
+                        {
+                            return;
+                        }
+
+                        ticks.AddRange(e.Ticks);
+
+                        if (e.Done)
+                        {
+                            tcs.SetResult(ticks);
+                        }
+                    }
+                );
+
+            HistoricalTicksMid += handler;
+
+            tcs.Task.ContinueWith(t =>
+            {
+                HistoricalTicksMid -= handler;
+            });
 
             clientSocket.reqHistoricalTicks(
                 reqId,
@@ -138,53 +246,90 @@ namespace IBKRWrapper
             return tcs.Task;
         }
 
-        public void historicalData(int reqId, Bar bar) => _barsResults[reqId].Add(bar);
+        public Task<DateTimeOffset> GetHeadTimestampAsync(
+            Contract contract,
+            string whatToShow,
+            int useRTH
+        )
+        {
+            int reqId;
+            TaskCompletionSource<DateTimeOffset> tcs = new();
+
+            lock (_reqIdLock)
+            {
+                reqId = _reqId++;
+            }
+
+            EventHandler<HeadTimestampEventArgs> handler =
+                new(
+                    (sender, e) =>
+                    {
+                        if (e.ReqId != reqId)
+                        {
+                            return;
+                        }
+                        tcs.SetResult(e.HeadTimestamp);
+                    }
+                );
+
+            HeadTimestamp += handler;
+
+            tcs.Task.ContinueWith(t =>
+            {
+                HeadTimestamp -= handler;
+            });
+
+            clientSocket.reqHeadTimestamp(reqId, contract, whatToShow, useRTH, 1);
+
+            return tcs.Task;
+        }
+
+        public event EventHandler<HistoricalDataEventArgs>? HistoricalData;
+
+        public void historicalData(int reqId, Bar bar)
+        {
+            HistoricalData?.Invoke(this, new HistoricalDataEventArgs(reqId, bar));
+        }
+
+        public event EventHandler<HistoricalDataEndEventArgs>? HistoricalDataEnd;
 
         public void historicalDataEnd(int reqId, string startDate, string endDate)
         {
-            _barsTcs[reqId].SetResult(_barsResults[reqId]);
-            _barsResults.Remove(reqId);
-            _barsTcs.Remove(reqId);
+            HistoricalDataEnd?.Invoke(
+                this,
+                new HistoricalDataEndEventArgs(reqId, startDate, endDate)
+            );
         }
+
+        public event EventHandler<HeadTimestampEventArgs>? HeadTimestamp;
 
         public void headTimestamp(int reqId, string headTimestamp)
         {
-            DateTimeOffset stamp = IbDateParser.ParseIBDateTime(headTimestamp);
-            _earliestDataTcs[reqId].SetResult(stamp);
-            _earliestDataTcs.Clear();
+            HeadTimestamp?.Invoke(this, new HeadTimestampEventArgs(reqId, headTimestamp));
         }
+
+        public event EventHandler<HistoricalTicksLastEventArgs>? HistoricalTicksLast;
 
         public void historicalTicksLast(int reqId, HistoricalTickLast[] ticks, bool done)
         {
-            _lastTickResults[reqId].AddRange(ticks);
-            if (done)
-            {
-                _lastTickTcs[reqId].SetResult(_lastTickResults[reqId]);
-                _lastTickResults.Remove(reqId);
-                _lastTickTcs.Remove(reqId);
-            }
+            HistoricalTicksLast?.Invoke(this, new HistoricalTicksLastEventArgs(reqId, ticks, done));
         }
+
+        public event EventHandler<HistoricalTicksBidAskEventArgs>? HistoricalTicksBidAsk;
 
         public void historicalTicksBidAsk(int reqId, HistoricalTickBidAsk[] ticks, bool done)
         {
-            _bidAskResults[reqId].AddRange(ticks);
-            if (done)
-            {
-                _bidAskTcs[reqId].SetResult(_bidAskResults[reqId]);
-                _bidAskResults.Remove(reqId);
-                _bidAskTcs.Remove(reqId);
-            }
+            HistoricalTicksBidAsk?.Invoke(
+                this,
+                new HistoricalTicksBidAskEventArgs(reqId, ticks, done)
+            );
         }
+
+        public event EventHandler<HistoricalTicksMidEventArgs>? HistoricalTicksMid;
 
         public void historicalTicks(int reqId, HistoricalTick[] ticks, bool done)
         {
-            _midResults[reqId].AddRange(ticks);
-            if (done)
-            {
-                _midTcs[reqId].SetResult(_midResults[reqId]);
-                _midResults.Remove(reqId);
-                _midTcs.Remove(reqId);
-            }
+            HistoricalTicksMid?.Invoke(this, new HistoricalTicksMidEventArgs(reqId, ticks, done));
         }
     }
 }

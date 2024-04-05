@@ -5,17 +5,25 @@ namespace IBKRWrapper.Models
 {
     public class ScannerData(int reqId, ScannerSubscription sub, List<TagValue> filterOptions)
     {
-        public int ReqId { get; set; } = reqId;
-        public ScannerSubscription Subscription { get; set; } = sub;
-        public List<TagValue> FilterOptions { get; set; } = filterOptions;
-        public Dictionary<int, Contract> ScannerResults { get; set; } = [];
+        public int ReqId { get; init; } = reqId;
+        public ScannerSubscription Subscription { get; init; } = sub;
+        public List<TagValue> FilterOptions { get; init; } = filterOptions;
+        public Dictionary<int, Contract> ScannerResults { get; private set; } = [];
 
-        public void HandleScannerData(object? sender, IBKRScannerDataEventArgs e)
+        public void HandleScannerData(object? sender, ScannerDataEventArgs e)
         {
             if (e.ReqId == ReqId)
             {
-                ScannerResults.Add(e.Rank, e.Contract);
+                ScannerResults.TryAdd(e.Rank, e.Contract);
             }
+        }
+
+        public string ResultsString()
+        {
+            return string.Join(
+                "\n",
+                ScannerResults.Select(x => $"Ticker: {x.Value.Symbol}  |   Rank: {x.Key}").ToArray()
+            );
         }
     }
 }
