@@ -29,20 +29,16 @@ namespace IBKRWrapper
             set => _nextOrderId = value;
         }
 
-        private bool ValidOrderId { get; set; }
-
         public void nextValidId(int orderId)
         {
-            if (orderId > NextOrderId)
-            {
-                NextOrderId = orderId;
-                ValidOrderId = true;
-            }
+            _nextOrderId = orderId;
         }
 
         public void Connect(string host, int port, int clientId)
         {
             clientSocket.eConnect(host, port, clientId);
+
+            while (NextOrderId <= 0) { }
 
             EReader reader = new(clientSocket, Signal);
             reader.Start();
