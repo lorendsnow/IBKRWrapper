@@ -26,7 +26,8 @@
         {
             get
             {
-                List<string> AcceptedStates = new(["PreSubmitted", "Submitted", "Filled"]);
+                List<string> AcceptedStates =
+                    new(["PendingSubmit", "PreSubmitted", "Submitted", "Filled"]);
                 return AcceptedStates.Contains(this.Status);
             }
         }
