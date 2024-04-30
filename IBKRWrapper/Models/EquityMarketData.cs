@@ -5,8 +5,10 @@ using IBApi;
 
 namespace IBKRWrapper.Models
 {
-    public class EquityMarketData(int reqId, Contract contract) : LiveMarketData(reqId, contract)
+    public class EquityMarketData : LiveMarketData
     {
+        public EquityMarketData(int reqId, Contract contract) : base(reqId, contract) { }
+        
         public override void UpdateMarketData<T>(object? sender, MarketDataEventArgs<T> e)
         {
             if (e.Data.RequestId != ReqId) return;
