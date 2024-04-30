@@ -23,52 +23,6 @@ namespace IBKRWrapper
             Console.WriteLine("Current Time: " + time + "\n");
         }
 
-        //! [tickprice]
-        public virtual void tickPrice(int tickerId, int field, double price, TickAttrib attribs)
-        {
-            Console.WriteLine(
-                "Tick Price. Ticker Id:"
-                    + tickerId
-                    + ", Field: "
-                    + field
-                    + ", Price: "
-                    + Util.DoubleMaxString(price)
-                    + ", CanAutoExecute: "
-                    + attribs.CanAutoExecute
-                    + ", PastLimit: "
-                    + attribs.PastLimit
-                    + ", PreOpen: "
-                    + attribs.PreOpen
-            );
-        }
-
-        //! [tickprice]
-
-        //! [ticksize]
-        public virtual void tickSize(int tickerId, int field, decimal size)
-        {
-            Console.WriteLine(
-                "Tick Size. Ticker Id:"
-                    + tickerId
-                    + ", Field: "
-                    + field
-                    + ", Size: "
-                    + Util.DecimalMaxString(size)
-            );
-        }
-
-        //! [ticksize]
-
-        //! [tickstring]
-        public virtual void tickString(int tickerId, int tickType, string value)
-        {
-            Console.WriteLine(
-                "Tick string. Ticker Id:" + tickerId + ", Type: " + tickType + ", Value: " + value
-            );
-        }
-
-        //! [tickstring]
-
         //! [tickgeneric]
         public virtual void tickGeneric(int tickerId, int field, double value)
         {
@@ -153,49 +107,6 @@ namespace IBKRWrapper
         }
 
         //! [managedaccounts]
-
-        //! [tickoptioncomputation]
-        public virtual void tickOptionComputation(
-            int tickerId,
-            int field,
-            int tickAttrib,
-            double impliedVolatility,
-            double delta,
-            double optPrice,
-            double pvDividend,
-            double gamma,
-            double vega,
-            double theta,
-            double undPrice
-        )
-        {
-            Console.WriteLine(
-                "TickOptionComputation. TickerId: "
-                    + tickerId
-                    + ", field: "
-                    + field
-                    + ", TickAttrib: "
-                    + Util.IntMaxString(tickAttrib)
-                    + ", ImpliedVolatility: "
-                    + Util.DoubleMaxString(impliedVolatility)
-                    + ", Delta: "
-                    + Util.DoubleMaxString(delta)
-                    + ", OptionPrice: "
-                    + Util.DoubleMaxString(optPrice)
-                    + ", pvDividend: "
-                    + Util.DoubleMaxString(pvDividend)
-                    + ", Gamma: "
-                    + Util.DoubleMaxString(gamma)
-                    + ", Vega: "
-                    + Util.DoubleMaxString(vega)
-                    + ", Theta: "
-                    + Util.DoubleMaxString(theta)
-                    + ", UnderlyingPrice: "
-                    + Util.DoubleMaxString(undPrice)
-            );
-        }
-
-        //! [tickoptioncomputation]
 
         //! [accountsummary]
         public virtual void accountSummary(
