@@ -2,8 +2,8 @@ namespace IBKRWrapper.Models
 {
     public abstract class LiveMarketData
     {
-        public required int ReqId { get; init; } 
-        public required Contract Contract { get; init; }
+        public int ReqId { get; init; } 
+        public Contract Contract { get; init; }
         public List<double> BidPrices { get; private set; } = [];
         public List<decimal> BidSizes { get; private set; } = [];
         public List<double> AskPrices { get; private set; } = [];
