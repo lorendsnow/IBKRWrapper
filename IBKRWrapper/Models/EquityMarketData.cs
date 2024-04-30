@@ -10,14 +10,14 @@ namespace IBKRWrapper.Models
         public int ReqId { get; init; } = reqId;
         public Contract Contract { get; init; } = contract;
         public List<double> BidPrices { get; private set; } = [];
-        public List<int> BidSizes { get; private set; } = [];
+        public List<decimal> BidSizes { get; private set; } = [];
         public List<double> AskPrices { get; private set; } = [];
-        public List<int> AskSizes { get; private set; } = [];
+        public List<decimal> AskSizes { get; private set; } = [];
         public List<double> LastPrices { get; private set; } = [];
-        public List<int> LastSizes { get; private set; } = [];
+        public List<decimal> LastSizes { get; private set; } = [];
         public List<double> Highs { get; private set; } = [];
         public List<double> Lows { get; private set; } = [];
-        public List<int> Volumes { get; private set; } = [];
+        public List<decimal> Volumes { get; private set; } = [];
         public double? OpenTick { get; private set; }
         public List<DateTimeOffset> TimeStamps { get; private set; } = [];
 
@@ -60,7 +60,7 @@ namespace IBKRWrapper.Models
                             )
                 }
             }
-            else if (e.Data.Value is int)
+            else if (e.Data.Value is decimal)
             {
                 switch ((EquityTickIds)e.Data.Field)
                 {
