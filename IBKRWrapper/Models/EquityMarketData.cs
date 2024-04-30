@@ -52,6 +52,12 @@ namespace IBKRWrapper.Models
                     case EquityTickIds.OpenTick:
                         if (OpenTick is null) OpenTick = e.Data.Value;
                         break;
+
+                    default:
+                        throw new NotImplementedException(
+                            $"Field {(EquityTickIds)e.Data.Field} as double isn't a valid data "
+                            + "type for equities market data"
+                            )
                 }
             }
             else if (e.Data.Value is int)
@@ -73,11 +79,18 @@ namespace IBKRWrapper.Models
                     case EquityTickIds.Volume:
                         Volumes.Add(e.Data.Value);
                         break;
+                    
+                    default:
+                        throw new NotImplementedException(
+                            $"Field {(EquityTickIds)e.Data.Field} as int isn't a valid data type "
+                            + "for equities market data"
+                            )
                 }
             }
             else if (e.Data.Value is string && (EquityTickIds)e.Data.Field == EquityTickIds.TimeStamp)
             {
                 TimeStamps.Add(IbDateParser.ParseIBDateTime(e.Data.Value));
+                throw new 
             }
             else
             {
