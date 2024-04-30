@@ -2,6 +2,7 @@
 using IBApi;
 using IBKRWrapper.Events;
 using IBKRWrapper.Models;
+using IBKRWrapper.Utils;
 
 namespace IBKRWrapper
 {
@@ -26,20 +27,11 @@ namespace IBKRWrapper
             ExecDetailsEvent += trade.HandleExecution;
             CommissionEvent += trade.HandleCommission;
 
-            EventHandler<OrderStatusEventArgs> statusUpdate =
-                new(
-                    (sender, e) =>
-                    {
-                        if (e.OrderStatus.OrderId == orderId && e.OrderStatus.Accepted)
-                        {
-                            tcs.SetResult(trade);
-                        }
-                        else if (e.OrderStatus.OrderId == orderId && e.OrderStatus.Canceled)
-                        {
-                            tcs.SetCanceled();
-                        }
-                    }
-                );
+            EventHandler<OrderStatusEventArgs> statusUpdate = HandlerFactory.MakeOrderStatusHandler(
+                orderId,
+                tcs,
+                trade
+            );
 
             OrderStatusEvent += statusUpdate;
 
@@ -61,20 +53,10 @@ namespace IBKRWrapper
             {
                 List<OpenOrderEventArgs> orders = [];
                 TaskCompletionSource<List<OpenOrderEventArgs>> tcs = new();
-                EventHandler<OpenOrderEventArgs> addOrder =
-                    new(
-                        (sender, e) =>
-                        {
-                            orders.Add(e);
-                        }
-                    );
-                EventHandler orderEnd =
-                    new(
-                        (sender, e) =>
-                        {
-                            tcs.SetResult(orders);
-                        }
-                    );
+                EventHandler<OpenOrderEventArgs> addOrder = HandlerFactory.MakeOpenOrderHandler(
+                    orders
+                );
+                EventHandler orderEnd = HandlerFactory.MakeOpenOrderEndHandler(orders, tcs);
 
                 OpenOrderEvent += addOrder;
                 OpenOrderEndEvent += orderEnd;
@@ -98,19 +80,8 @@ namespace IBKRWrapper
                 List<Trade> trades = [];
                 TaskCompletionSource<List<Trade>> tcs = new();
                 EventHandler<OpenOrderEventArgs> handler =
-                    new(
-                        (sender, e) =>
-                        {
-                            trades.Add(new(e.OrderId, e.Contract, e.Order, e.OrderState.Status));
-                        }
-                    );
-                EventHandler orderEnd =
-                    new(
-                        (sender, e) =>
-                        {
-                            tcs.SetResult(trades);
-                        }
-                    );
+                    HandlerFactory.MakeOpenOrderAsTradesHandler(trades);
+                EventHandler orderEnd = HandlerFactory.MakeOpenOrderAsTradeEndHandler(trades, tcs);
 
                 OpenOrderEvent += handler;
                 OpenOrderEndEvent += orderEnd;

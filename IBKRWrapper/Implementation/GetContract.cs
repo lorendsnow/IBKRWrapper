@@ -1,5 +1,7 @@
 ﻿using IBApi;
 using IBKRWrapper.Events;
+using IBKRWrapper.Models;
+using IBKRWrapper.Utils;
 
 namespace IBKRWrapper
 {
@@ -30,25 +32,9 @@ namespace IBKRWrapper
                 };
 
             EventHandler<ContractDetailsEventArgs> contractDetailsHandler =
-                new(
-                    (sender, e) =>
-                    {
-                        if (e.ReqId == reqId)
-                        {
-                            contracts.Add(e.Details.Contract);
-                        }
-                    }
-                );
+                HandlerFactory.MakeContractDetailsHandler(contracts, reqId);
             EventHandler<ContractDetailsEndEventArgs> contractDetailsEndHandler =
-                new(
-                    (sender, e) =>
-                    {
-                        if (e.ReqId == reqId)
-                        {
-                            tcs.SetResult(contracts);
-                        }
-                    }
-                );
+                HandlerFactory.MakeContractDetailsEndHandler(contracts, reqId, tcs);
 
             ContractDetailsEvent += contractDetailsHandler;
             ContractDetailsEndEvent += contractDetailsEndHandler;
@@ -62,6 +48,47 @@ namespace IBKRWrapper
             clientSocket.reqContractDetails(reqId, contract);
 
             return tcs.Task;
+        }
+
+        public Task<OptionsChain> GetOptionsChain(string symbol)
+        {
+            int reqId;
+            lock (_reqIdLock)
+            {
+                reqId = _reqId++;
+            }
+
+            TaskCompletionSource<OptionsChain> tcs = new();
+            OptionsChain result = new() { ReqId = reqId, Symbol = symbol };
+            EventHandler<OptionsChainEndEventArgs> handler =
+                HandlerFactory.MakeOptionsChainEndHandler(tcs, result);
+            List<Contract> cons = GetQualifiedStockContractAsync(symbol).Result;
+            int conId = cons[0].ConId;
+
+            OptionsChainEvent += result.HandleOptionsChainData;
+            OptionsChainEndEvent += handler;
+
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            tcs.Task.ContinueWith(t =>
+            {
+                OptionsChainEvent -= result.HandleOptionsChainData;
+                OptionsChainEndEvent -= handler;
+            });
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+
+            clientSocket.reqSecDefOptParams(reqId, symbol, "", "STK", conId);
+
+            return tcs.Task;
+        }
+
+        private void Wrapper_OptionsChainEndEvent(object? sender, OptionsChainEndEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Wrapper_OptionsChainEvent(object? sender, OptionsChainEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         public event EventHandler<ContractDetailsEventArgs>? ContractDetailsEvent;
@@ -79,6 +106,39 @@ namespace IBKRWrapper
         public void contractDetailsEnd(int reqId)
         {
             ContractDetailsEndEvent?.Invoke(this, new ContractDetailsEndEventArgs(reqId));
+        }
+
+        public event EventHandler<OptionsChainEventArgs>? OptionsChainEvent;
+
+        public void securityDefinitionOptionParameter(
+            int reqId,
+            string exchange,
+            int underlyingConId,
+            string tradingClass,
+            string multiplier,
+            HashSet<string> expirations,
+            HashSet<double> strikes
+        )
+        {
+            OptionsChainEvent?.Invoke(
+                this,
+                new OptionsChainEventArgs(
+                    reqId,
+                    exchange,
+                    underlyingConId,
+                    tradingClass,
+                    multiplier,
+                    expirations,
+                    strikes
+                )
+            );
+        }
+
+        public event EventHandler<OptionsChainEndEventArgs>? OptionsChainEndEvent;
+
+        public void securityDefinitionOptionParameterEnd(int reqId)
+        {
+            OptionsChainEndEvent?.Invoke(this, new OptionsChainEndEventArgs(reqId));
         }
     }
 }

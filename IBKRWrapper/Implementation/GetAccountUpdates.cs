@@ -1,7 +1,7 @@
-﻿using System.Collections.Concurrent;
-using IBApi;
+﻿using IBApi;
 using IBKRWrapper.Events;
 using IBKRWrapper.Models;
+using IBKRWrapper.Utils;
 
 namespace IBKRWrapper
 {
@@ -17,17 +17,9 @@ namespace IBKRWrapper
                 TaskCompletionSource<List<PortfolioPosition>> tcs = new();
 
                 EventHandler<UpdatePortfolioEventArgs> updatePortfolioHandler =
-                    new((sender, e) => positions.Add(e.Position));
+                    HandlerFactory.MakeUpdatePortfolioHandler(positions);
                 EventHandler<AccountDownloadEndEventArgs> accountDownloadEndHandler =
-                    new(
-                        (sender, e) =>
-                        {
-                            if (e.Account == account)
-                            {
-                                tcs.SetResult(positions);
-                            }
-                        }
-                    );
+                    HandlerFactory.MakeAccountDownloadEndHandler(account, tcs, positions);
 
                 UpdatePortfolioEvent += updatePortfolioHandler;
                 AccountDownloadEndEvent += accountDownloadEndHandler;
@@ -52,25 +44,9 @@ namespace IBKRWrapper
                 Dictionary<string, string> accountValues = [];
 
                 EventHandler<UpdateAccountValueEventArgs> updateAccountValueHandler =
-                    new(
-                        (sender, e) =>
-                        {
-                            if (e.AccountName == account && e.Currency == "USD")
-                            {
-                                accountValues.Add(e.Key, e.Value);
-                            }
-                        }
-                    );
+                    HandlerFactory.MakeUpdateAccountValueHandler(account, accountValues);
                 EventHandler<AccountDownloadEndEventArgs> accountDownloadEndHandler =
-                    new(
-                        (sender, e) =>
-                        {
-                            if (e.Account == account)
-                            {
-                                tcs.SetResult(accountValues);
-                            }
-                        }
-                    );
+                    HandlerFactory.MakeAccountDownloadEndHandler(account, tcs, accountValues);
 
                 UpdateAccountValueEvent += updateAccountValueHandler;
                 AccountDownloadEndEvent += accountDownloadEndHandler;

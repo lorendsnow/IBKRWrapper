@@ -1,6 +1,7 @@
 ﻿using IBApi;
 using IBKRWrapper.Events;
 using IBKRWrapper.Models;
+using IBKRWrapper.Utils;
 
 namespace IBKRWrapper
 {
@@ -17,19 +18,8 @@ namespace IBKRWrapper
                 List<Position> positions = [];
 
                 EventHandler<PositionEventArgs> positionHandler =
-                    new(
-                        (sender, e) =>
-                        {
-                            positions.Add(e.Position);
-                        }
-                    );
-                EventHandler positionEnd =
-                    new(
-                        (sender, e) =>
-                        {
-                            tcs.SetResult(positions);
-                        }
-                    );
+                    HandlerFactory.MakePositionHandler(positions);
+                EventHandler positionEnd = HandlerFactory.MakePositionEndHandler(positions, tcs);
 
                 PositionEvent += positionHandler;
                 PositionEndEvent += positionEnd;

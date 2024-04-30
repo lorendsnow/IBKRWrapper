@@ -329,14 +329,6 @@ namespace IBKRWrapper
 
         //! [updatenewsbulletin]
 
-        //! [scannerdataend]
-        public virtual void scannerDataEnd(int reqId)
-        {
-            Console.WriteLine("ScannerDataEnd. " + reqId);
-        }
-
-        //! [scannerdataend]
-
         //! [receivefa]
         public virtual void receiveFA(int faDataType, string faXmlData)
         {
@@ -470,39 +462,6 @@ namespace IBKRWrapper
         }
 
         //! [accountupdatemultiend]
-
-        //! [securityDefinitionOptionParameter]
-        public void securityDefinitionOptionParameter(
-            int reqId,
-            string exchange,
-            int underlyingConId,
-            string tradingClass,
-            string multiplier,
-            HashSet<string> expirations,
-            HashSet<double> strikes
-        )
-        {
-            Console.WriteLine(
-                "Security Definition Option Parameter. Reqest: {0}, Exchange: {1}, Undrelying contract id: {2}, Trading class: {3}, Multiplier: {4}, Expirations: {5}, Strikes: {6}",
-                reqId,
-                exchange,
-                Util.IntMaxString(underlyingConId),
-                tradingClass,
-                multiplier,
-                string.Join(", ", expirations),
-                string.Join(", ", strikes)
-            );
-        }
-
-        //! [securityDefinitionOptionParameter]
-
-        //! [securityDefinitionOptionParameterEnd]
-        public void securityDefinitionOptionParameterEnd(int reqId)
-        {
-            Console.WriteLine("Security Definition Option Parameter End. Request: " + reqId + "\n");
-        }
-
-        //! [securityDefinitionOptionParameterEnd]
 
         //! [connectack]
         public void connectAck()

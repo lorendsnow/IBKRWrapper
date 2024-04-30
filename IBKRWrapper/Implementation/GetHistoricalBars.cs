@@ -26,28 +26,10 @@ namespace IBKRWrapper
             }
 
             EventHandler<HistoricalDataEventArgs> handler =
-                new(
-                    (sender, e) =>
-                    {
-                        if (e.ReqId != reqId)
-                        {
-                            return;
-                        }
-                        bars.Add(e.Bar);
-                    }
-                );
+                HandlerFactory.MakeHistoricalDataHandler(bars, reqId);
 
             EventHandler<HistoricalDataEndEventArgs> endHandler =
-                new(
-                    (sender, e) =>
-                    {
-                        if (e.ReqId != reqId)
-                        {
-                            return;
-                        }
-                        tcs.SetResult(bars);
-                    }
-                );
+                HandlerFactory.MakeHistoricalDataEndHandler(bars, reqId, tcs);
 
             HistoricalData += handler;
             HistoricalDataEnd += endHandler;
@@ -92,22 +74,7 @@ namespace IBKRWrapper
             }
 
             EventHandler<HistoricalTicksLastEventArgs> handler =
-                new(
-                    (sender, e) =>
-                    {
-                        if (e.ReqId != reqId)
-                        {
-                            return;
-                        }
-
-                        ticks.AddRange(e.Ticks);
-
-                        if (e.Done)
-                        {
-                            tcs.SetResult(ticks);
-                        }
-                    }
-                );
+                HandlerFactory.MakeHistoricalTicksLastHandler(ticks, reqId, tcs);
 
             HistoricalTicksLast += handler;
 
@@ -150,22 +117,7 @@ namespace IBKRWrapper
             }
 
             EventHandler<HistoricalTicksBidAskEventArgs> handler =
-                new(
-                    (sender, e) =>
-                    {
-                        if (e.ReqId != reqId)
-                        {
-                            return;
-                        }
-
-                        ticks.AddRange(e.Ticks);
-
-                        if (e.Done)
-                        {
-                            tcs.SetResult(ticks);
-                        }
-                    }
-                );
+                HandlerFactory.MakeHistoricalTicksBidAskHandler(ticks, reqId, tcs);
 
             HistoricalTicksBidAsk += handler;
 
@@ -207,22 +159,7 @@ namespace IBKRWrapper
             }
 
             EventHandler<HistoricalTicksMidEventArgs> handler =
-                new(
-                    (sender, e) =>
-                    {
-                        if (e.ReqId != reqId)
-                        {
-                            return;
-                        }
-
-                        ticks.AddRange(e.Ticks);
-
-                        if (e.Done)
-                        {
-                            tcs.SetResult(ticks);
-                        }
-                    }
-                );
+                HandlerFactory.MakeHistoricalTicksMidHandler(ticks, reqId, tcs);
 
             HistoricalTicksMid += handler;
 
@@ -260,17 +197,10 @@ namespace IBKRWrapper
                 reqId = _reqId++;
             }
 
-            EventHandler<HeadTimestampEventArgs> handler =
-                new(
-                    (sender, e) =>
-                    {
-                        if (e.ReqId != reqId)
-                        {
-                            return;
-                        }
-                        tcs.SetResult(e.HeadTimestamp);
-                    }
-                );
+            EventHandler<HeadTimestampEventArgs> handler = HandlerFactory.MakeHeadTimestampHandler(
+                tcs,
+                reqId
+            );
 
             HeadTimestamp += handler;
 

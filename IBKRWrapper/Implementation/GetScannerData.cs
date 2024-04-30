@@ -1,6 +1,7 @@
 ﻿using IBApi;
 using IBKRWrapper.Events;
 using IBKRWrapper.Models;
+using IBKRWrapper.Utils;
 
 namespace IBKRWrapper
 {
@@ -15,12 +16,7 @@ namespace IBKRWrapper
                 TaskCompletionSource<string> tcs = new();
 
                 EventHandler<ScannerParametersEventArgs> handler =
-                    new(
-                        (sender, e) =>
-                        {
-                            tcs.SetResult(e.XML);
-                        }
-                    );
+                    HandlerFactory.MakeScannerParametersHandler(tcs);
 
                 ScannerParametersEvent += handler;
 
@@ -58,6 +54,7 @@ namespace IBKRWrapper
 
             ScannerData scannerData = new(reqId, scannerSub, tagValues);
             ScannerDataEvent += scannerData.HandleScannerData;
+            ScannerDataEndEvent += scannerData.HandleScannerDataEnd;
 
             clientSocket.reqScannerSubscription(reqId, scannerSub, null, tagValues);
 
@@ -98,12 +95,14 @@ namespace IBKRWrapper
 
         public event EventHandler<ScannerParametersEventArgs>? ScannerParametersEvent;
 
+        public event EventHandler<ScannerDataEndArgs>? ScannerDataEndEvent;
+
         public void scannerParameters(string xml)
         {
             ScannerParametersEvent?.Invoke(this, new ScannerParametersEventArgs(xml));
         }
 
-        public virtual void scannerData(
+        public void scannerData(
             int reqId,
             int rank,
             ContractDetails contractDetails,
@@ -117,6 +116,11 @@ namespace IBKRWrapper
                 this,
                 new ScannerDataEventArgs(reqId, rank, contractDetails.Contract)
             );
+        }
+
+        public void scannerDataEnd(int reqId)
+        {
+            ScannerDataEndEvent?.Invoke(this, new ScannerDataEndArgs(reqId));
         }
     }
 }
