@@ -81,16 +81,6 @@ namespace IBKRWrapper
             return tcs.Task;
         }
 
-        private void Wrapper_OptionsChainEndEvent(object? sender, OptionsChainEndEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void Wrapper_OptionsChainEvent(object? sender, OptionsChainEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
         public event EventHandler<ContractDetailsEventArgs>? ContractDetailsEvent;
 
         public void contractDetails(int reqId, ContractDetails contractDetails)
