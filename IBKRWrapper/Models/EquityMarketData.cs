@@ -5,23 +5,9 @@ using IBApi;
 
 namespace IBKRWrapper.Models
 {
-    public class EquityMarketData(int reqId, Contract contract)
+    public class EquityMarketData(int reqId, Contract contract): LiveMarketData(reqId, contract)
     {
-        public int ReqId { get; init; } = reqId;
-        public Contract Contract { get; init; } = contract;
-        public List<double> BidPrices { get; private set; } = [];
-        public List<decimal> BidSizes { get; private set; } = [];
-        public List<double> AskPrices { get; private set; } = [];
-        public List<decimal> AskSizes { get; private set; } = [];
-        public List<double> LastPrices { get; private set; } = [];
-        public List<decimal> LastSizes { get; private set; } = [];
-        public List<double> Highs { get; private set; } = [];
-        public List<double> Lows { get; private set; } = [];
-        public List<decimal> Volumes { get; private set; } = [];
-        public double? OpenTick { get; private set; }
-        public List<DateTimeOffset> TimeStamps { get; private set; } = [];
-
-        public void UpdateMarketData<T>(object? sender, MarketDataEventArgs<T> e)
+        public override void UpdateMarketData<T>(object? sender, MarketDataEventArgs<T> e)
         {
             if (e.Data.RequestId != ReqId) return;
 
