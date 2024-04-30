@@ -5,8 +5,10 @@ using IBApi;
 
 namespace IBKRWrapper.Models
 {
-    public class OptionMarketData(int reqId, Contract contract) : LiveMarketData(reqId, contract)
+    public class OptionMarketData : LiveMarketData
     {
+        public OptionMarketData(int reqId, Contract contract) : base(reqId, contract) { }
+        
         public List<OptionGreeks> BidGreeks { get; private set; } = [];
         public List<OptionGreeks> AskGreeks { get; private set; } = [];
         public List<OptionGreeks> LastGreeks { get; private set; } = [];
