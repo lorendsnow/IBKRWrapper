@@ -44,10 +44,7 @@ namespace IBKRWrapper.Models
                     break;
 
                 default:
-                    throw new NotImplementedException(
-                        $"Field {(OptionTickIds)e.Data.Field} as double isn't a valid data "
-                            + "type for option market data"
-                    );
+                    break;
             }
         }
 
@@ -75,10 +72,7 @@ namespace IBKRWrapper.Models
                     break;
 
                 default:
-                    throw new NotImplementedException(
-                        $"Field {(OptionTickIds)e.Data.Field} as int isn't a valid data type "
-                            + "for option market data"
-                    );
+                    break;
             }
         }
 
@@ -103,10 +97,7 @@ namespace IBKRWrapper.Models
                     break;
 
                 default:
-                    throw new NotImplementedException(
-                        $"Field {(OptionTickIds)e.Data.Field} as OptionGreeks isn't a valid "
-                            + "data type for option market data"
-                    );
+                    break;
             }
         }
 
@@ -118,10 +109,6 @@ namespace IBKRWrapper.Models
             if ((OptionTickIds)e.Data.Field == OptionTickIds.LastTimestamp)
             {
                 TimeStamps.Add(IbDateParser.ParseIBDateTime(e.Data.Value));
-            }
-            else
-            {
-                throw new ArgumentException("Invalid data type");
             }
         }
     }

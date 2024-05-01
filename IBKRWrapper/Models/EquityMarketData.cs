@@ -39,10 +39,7 @@ namespace IBKRWrapper.Models
                     break;
 
                 default:
-                    throw new NotImplementedException(
-                        $"Field {(EquityTickIds)e.Data.Field} as double isn't a valid data "
-                            + "type for equities market data"
-                    );
+                    break;
             }
         }
 
@@ -70,10 +67,7 @@ namespace IBKRWrapper.Models
                     break;
 
                 default:
-                    throw new NotImplementedException(
-                        $"Field {(EquityTickIds)e.Data.Field} as int isn't a valid data type "
-                            + "for equities market data"
-                    );
+                    break;
             }
         }
 
@@ -85,13 +79,6 @@ namespace IBKRWrapper.Models
             if ((EquityTickIds)e.Data.Field == EquityTickIds.LastTimestamp)
             {
                 TimeStamps.Add(IbDateParser.ParseIBDateTime(e.Data.Value));
-            }
-            else
-            {
-                throw new NotImplementedException(
-                    $"Field {(EquityTickIds)e.Data.Field} as string isn't a valid data type "
-                        + "for equities market data"
-                );
             }
         }
 
