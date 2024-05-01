@@ -33,10 +33,10 @@ namespace IBKRWrapper
                 _ => throw new NotImplementedException("Haven't implemented that type yet")
             };
 
-        public event EventHandler<MarketDataEventArgs<double>> DoubleMarketDataEvent;
-        public event EventHandler<MarketDataEventArgs<decimal>> DecimalMarketDataEvent;
-        public event EventHandler<MarketDataEventArgs<string>> StringMarketDataEvent;
-        public event EventHandler<MarketDataEventArgs<OptionGreeks>> OptionGreeksMarketDataEvent;
+        public event EventHandler<MarketDataEventArgs<double>>? DoubleMarketDataEvent;
+        public event EventHandler<MarketDataEventArgs<decimal>>? DecimalMarketDataEvent;
+        public event EventHandler<MarketDataEventArgs<string>>? StringMarketDataEvent;
+        public event EventHandler<MarketDataEventArgs<OptionGreeks>>? OptionGreeksMarketDataEvent;
 
         public void tickString(int tickerId, int tickType, string value)
         {
