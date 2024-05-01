@@ -78,6 +78,9 @@ namespace IBKRWrapper.Models
 
         public override void UpdateMarketData(object? sender, MarketDataEventArgs<OptionGreeks> e)
         {
+            if (e.Data.ReqId != ReqId)
+                return;
+            
             switch ((OptionTickIds)e.Data.Field)
             {
                 case OptionTickIds.BidOptionComputation:
