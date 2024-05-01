@@ -14,7 +14,8 @@ namespace IBKRWrapper
                 reqId = _reqId++;
             }
 
-            LiveMarketData data = GetDataObject(reqId, contract);
+            LiveMarketData data = new(reqId, contract);
+            
             StringMarketDataEvent += data.UpdateMarketData;
             DecimalMarketDataEvent += data.UpdateMarketData;
             DoubleMarketDataEvent += data.UpdateMarketData;
@@ -25,19 +26,20 @@ namespace IBKRWrapper
             return data;
         }
 
-        private static LiveMarketData GetDataObject(int reqId, Contract contract) =>
-            contract.SecType switch
-            {
-                "STK" => new EquityMarketData(reqId, contract),
-                "OPT" => new OptionMarketData(reqId, contract),
-                _ => throw new NotImplementedException("Haven't implemented that type yet")
-            };
-
         public event EventHandler<MarketDataEventArgs<double>>? DoubleMarketDataEvent;
         public event EventHandler<MarketDataEventArgs<decimal>>? DecimalMarketDataEvent;
         public event EventHandler<MarketDataEventArgs<string>>? StringMarketDataEvent;
         public event EventHandler<MarketDataEventArgs<OptionGreeks>>? OptionGreeksMarketDataEvent;
 
+        public void tickGeneric(int tickerId, int field, double value)
+        {
+            if (field == 49)
+            {
+                MarketDataEventArgs<double> data = new(tickerId, field, value);
+                DoubleMarketDataEvent?.Invoke(this, new MarketDataEventArgs<double>(data));
+            }
+        }
+        
         public void tickString(int tickerId, int tickType, string value)
         {
             MarketData<string> data = new(tickerId, tickType, value);
