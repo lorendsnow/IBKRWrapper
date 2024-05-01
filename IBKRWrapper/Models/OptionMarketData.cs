@@ -5,11 +5,8 @@ using IBKRWrapper.Utils;
 
 namespace IBKRWrapper.Models
 {
-    public class OptionMarketData : LiveMarketData
+    public class OptionMarketData(int reqId, Contract contract) : LiveMarketData(reqId, contract)
     {
-        public OptionMarketData(int reqId, Contract contract)
-            : base(reqId, contract) { }
-
         public List<OptionGreeks> BidGreeks { get; private set; } = [];
         public List<OptionGreeks> AskGreeks { get; private set; } = [];
         public List<OptionGreeks> LastGreeks { get; private set; } = [];
@@ -43,8 +40,7 @@ namespace IBKRWrapper.Models
                     break;
 
                 case OptionTickIds.OpenTick:
-                    if (OpenTick is null)
-                        OpenTick = e.Data.Value;
+                    OpenTick ??= e.Data.Value;
                     break;
 
                 default:
