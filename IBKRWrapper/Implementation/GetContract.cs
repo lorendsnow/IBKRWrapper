@@ -50,6 +50,55 @@ namespace IBKRWrapper
             return tcs.Task;
         }
 
+        public Task<List<Contract>> GetQualifiedOptionContractAsync(
+            string symbol,
+            string date,
+            double strike,
+            string right,
+            string exchange = "SMART",
+            string currency = "USD"
+        )
+        {
+            int reqId;
+            lock (_reqIdLock)
+            {
+                reqId = _reqId++;
+            }
+
+            TaskCompletionSource<List<Contract>> tcs = new();
+            List<Contract> contracts = [];
+
+            Contract contract =
+                new()
+                {
+                    Symbol = symbol,
+                    SecType = "OPT",
+                    LastTradeDateOrContractMonth = date,
+                    Strike = strike,
+                    Right = right,
+                    Exchange = exchange,
+                    Currency = currency
+                };
+
+            EventHandler<ContractDetailsEventArgs> contractDetailsHandler =
+                HandlerFactory.MakeContractDetailsHandler(contracts, reqId);
+            EventHandler<ContractDetailsEndEventArgs> contractDetailsEndHandler =
+                HandlerFactory.MakeContractDetailsEndHandler(contracts, reqId, tcs);
+
+            ContractDetailsEvent += contractDetailsHandler;
+            ContractDetailsEndEvent += contractDetailsEndHandler;
+
+            tcs.Task.ContinueWith(t =>
+            {
+                ContractDetailsEvent -= contractDetailsHandler;
+                ContractDetailsEndEvent -= contractDetailsEndHandler;
+            });
+
+            clientSocket.reqContractDetails(reqId, contract);
+
+            return tcs.Task;
+        }
+
         public Task<OptionsChain> GetOptionsChain(string symbol)
         {
             int reqId;
