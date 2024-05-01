@@ -23,21 +23,6 @@ namespace IBKRWrapper
             Console.WriteLine("Current Time: " + time + "\n");
         }
 
-        //! [tickgeneric]
-        public virtual void tickGeneric(int tickerId, int field, double value)
-        {
-            Console.WriteLine(
-                "Tick Generic. Ticker Id:"
-                    + tickerId
-                    + ", Field: "
-                    + field
-                    + ", Value: "
-                    + Util.DoubleMaxString(value)
-            );
-        }
-
-        //! [tickgeneric]
-
         public virtual void tickEFP(
             int tickerId,
             int tickType,
