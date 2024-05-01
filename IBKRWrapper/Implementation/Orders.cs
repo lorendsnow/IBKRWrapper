@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using IBApi;
+﻿using IBApi;
 using IBKRWrapper.Events;
 using IBKRWrapper.Models;
 using IBKRWrapper.Utils;
@@ -44,7 +43,7 @@ namespace IBKRWrapper
 
         public void CancelOrder(Order order)
         {
-            clientSocket.cancelOrder(order.OrderId, DateTimeOffset.Now.ToString());
+            clientSocket.cancelOrder(order.OrderId, DateTime.Now.ToString("yyyymmdd hh:mm:ss"));
         }
 
         public Task<List<OpenOrderEventArgs>> GetOpenOrdersAsync()
