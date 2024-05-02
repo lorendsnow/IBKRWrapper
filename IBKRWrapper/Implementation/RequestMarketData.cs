@@ -15,7 +15,7 @@ namespace IBKRWrapper
             }
 
             LiveMarketData data = new(reqId, contract);
-            
+
             StringMarketDataEvent += data.UpdateMarketData;
             DecimalMarketDataEvent += data.UpdateMarketData;
             DoubleMarketDataEvent += data.UpdateMarketData;
@@ -35,11 +35,11 @@ namespace IBKRWrapper
         {
             if (field == 49)
             {
-                MarketDataEventArgs<double> data = new(tickerId, field, value);
+                MarketData<double> data = new(tickerId, field, value);
                 DoubleMarketDataEvent?.Invoke(this, new MarketDataEventArgs<double>(data));
             }
         }
-        
+
         public void tickString(int tickerId, int tickType, string value)
         {
             MarketData<string> data = new(tickerId, tickType, value);

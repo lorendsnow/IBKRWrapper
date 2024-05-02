@@ -1,9 +1,11 @@
 using IBApi;
+using IBKRWrapper.Constants;
 using IBKRWrapper.Events;
+using IBKRWrapper.Utils;
 
 namespace IBKRWrapper.Models
 {
-    public class LiveMarketData(int reqId, Contract, contract)
+    public class LiveMarketData(int reqId, Contract contract)
     {
         public int ReqId { get; init; } = reqId;
         public Contract Contract { get; init; } = contract;
@@ -61,7 +63,7 @@ namespace IBKRWrapper.Models
                     break;
 
                 case StandardTickIds.Halted:
-                    Halted = e.Data.Value == (1 || 2) ? true : false;
+                    Halted = e.Data.Value == 1 || e.Data.Value == 2;
                     break;
 
                 default:
@@ -101,7 +103,7 @@ namespace IBKRWrapper.Models
         {
             if (e.Data.ReqId != ReqId)
                 return;
-            
+
             switch ((StandardTickIds)e.Data.Field)
             {
                 case StandardTickIds.BidOptionComputation:

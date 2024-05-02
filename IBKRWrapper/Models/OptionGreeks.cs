@@ -17,7 +17,7 @@ namespace IBKRWrapper.Models
     )
     {
         public int ReqId { get; init; } = ReqId;
-        public OptionTickIds Field { get; init; } = (OptionTickIds)FieldCode;
+        public StandardTickIds Field { get; init; } = (StandardTickIds)FieldCode;
         public OptionTickAttribute TickAttribute { get; init; } = (OptionTickAttribute)TickAttrib;
         public double ImpliedVolatility { get; init; } = ImpliedVolatility;
         public double Delta { get; init; } = Delta;
