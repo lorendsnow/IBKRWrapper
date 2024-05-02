@@ -43,7 +43,7 @@ namespace IBKRWrapper
 
         public void CancelOrder(Order order)
         {
-            clientSocket.cancelOrder(order.OrderId, DateTime.Now.ToString("yyyymmdd hh:mm:ss"));
+            clientSocket.cancelOrder(order.OrderId, DateTimeOffset.Now.ToString("yyyyMMdd HH:mm:ss") + " PST");
         }
 
         public Task<List<OpenOrderEventArgs>> GetOpenOrdersAsync()
