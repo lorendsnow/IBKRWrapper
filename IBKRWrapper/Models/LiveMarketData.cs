@@ -16,7 +16,7 @@ namespace IBKRWrapper.Models
         public List<double> Highs { get; private set; } = [];
         public List<double> Lows { get; private set; } = [];
         public List<decimal> Volumes { get; private set; } = [];
-        public double? CloseTick ( get; private set; }
+        public double? CloseTick { get; private set; }
         public double? OpenTick { get; private set; }
         public List<DateTimeOffset> TimeStamps { get; private set; } = [];
         public List<OptionGreeks> BidGreeks { get; private set; } = [];
