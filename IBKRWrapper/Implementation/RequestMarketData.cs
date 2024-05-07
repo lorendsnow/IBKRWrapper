@@ -26,6 +26,33 @@ namespace IBKRWrapper
             return data;
         }
 
+        public Task<OptionGreeks> CalculateOptionIV(Contract contract, double optionPrice, double underlyingPrice)
+        {
+            int reqId;
+            lock (_reqIdLock)
+            {
+                reqId = _reqId++;
+            }
+
+            TaskCompletionSource<OptionGreeks> tcs = new();
+
+            EventHandler<MarketDataEventArgs<OptionGreeks>> handler = (sender, e) =>
+            {
+                if (e.Data.ReqId == reqId) tcs.SetResult(e.Data.Value);
+            };
+
+            OptionGreeksMarketDataEvent += handler;
+
+            tcs.Task.ContinueWith(t =>
+            {
+                OptionGreeksMarketDataEvent -= handler;
+            });
+
+            clientSocket.calculateImpliedVolatility(reqId, contract, optionPrice, underlyingPrice, null);
+
+            return tcs.Task;
+        }
+
         public event EventHandler<MarketDataEventArgs<double>>? DoubleMarketDataEvent;
         public event EventHandler<MarketDataEventArgs<decimal>>? DecimalMarketDataEvent;
         public event EventHandler<MarketDataEventArgs<string>>? StringMarketDataEvent;
