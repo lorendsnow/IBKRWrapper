@@ -22,9 +22,23 @@ namespace IBKRWrapper.Models
                 Multiplier = e.Multiplier;
                 Exchange = e.Exchange;
 
-                Expirations = Expirations == null ? e.Expirations : Expirations.UnionWith(e.Expirations);
+                if (Expirations is null)
+                {
+                    Expirations = e.Expirations;
+                }
+                else
+                {
+                    Expirations.UnionWith(e.Expirations);
+                }
 
-                Strikes = Strikes == null ? e.Strikes : Strikes.UnionWith(e.Strikes);
+                if (Strikes is null)
+                {
+                    Strikes = e.Strikes;
+                }
+                else
+                {
+                    Strikes.UnionWith(e.Strikes);
+                }
             }
         }
     }
