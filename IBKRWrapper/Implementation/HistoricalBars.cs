@@ -1,18 +1,27 @@
 ﻿using IBApi;
+using IBKRWrapper.Constants;
 using IBKRWrapper.Events;
 using IBKRWrapper.Utils;
-using IBKRWrapper.Constants;
 
 namespace IBKRWrapper
 {
     public partial class Wrapper : EWrapper
     {
-        public async Task<List<Bar>> GetDailyHistoricalBarsAsync(Contract contract, BarDataType dataType, int numberOfDays)
+        public async Task<List<Bar>> GetDailyHistoricalBarsAsync(
+            Contract contract,
+            BarDataType dataType,
+            int numberOfDays
+        )
         {
-            string durationString = $"{numberofDays} D";
-            return await GetHistoricalBarsAsync(contract, durationString, "1 day", dataType.ToString());
+            string durationString = $"{numberOfDays} D";
+            return await GetHistoricalBarsAsync(
+                contract,
+                durationString,
+                "1 day",
+                dataType.ToString()
+            );
         }
-    
+
         public Task<List<Bar>> GetHistoricalBarsAsync(
             Contract contract,
             string durationString,
