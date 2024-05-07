@@ -50,10 +50,9 @@ namespace IBKRWrapper
             return tcs.Task;
         }
 
-        public Task<List<Contract>> GetQualifiedOptionContractAsync(
+        public Task<List<Contract>> GetQualifiedOptionContractsByDateAsync(
             string symbol,
             string date,
-            double strike,
             string right,
             string exchange = "SMART",
             string currency = "USD"
@@ -74,7 +73,6 @@ namespace IBKRWrapper
                     Symbol = symbol,
                     SecType = "OPT",
                     LastTradeDateOrContractMonth = date,
-                    Strike = strike,
                     Right = right,
                     Exchange = exchange,
                     Currency = currency
