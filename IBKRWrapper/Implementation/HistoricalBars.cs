@@ -47,13 +47,17 @@ namespace IBKRWrapper
             EventHandler<HistoricalDataEndEventArgs> endHandler =
                 HandlerFactory.MakeHistoricalDataEndHandler(bars, reqId, tcs);
 
+            EventHandler<Events.ErrorEventArgs> errorHandler = (sender, e) => { if (e.Id == reqId) tcs.SetException(new Exception(e.ErrorMsg)); };
+
             HistoricalData += handler;
             HistoricalDataEnd += endHandler;
+            ErrorEvent += errorHandler;
 
             tcs.Task.ContinueWith(t =>
             {
                 HistoricalData -= handler;
                 HistoricalDataEnd -= endHandler;
+                ErrorEvent -= errorHandler;
             });
 
             clientSocket.reqHistoricalData(
