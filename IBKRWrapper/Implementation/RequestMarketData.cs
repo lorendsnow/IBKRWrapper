@@ -1,6 +1,7 @@
 using IBApi;
 using IBKRWrapper.Events;
 using IBKRWrapper.Models;
+using IBKRWrapper.Constants;
 
 namespace IBKRWrapper
 {
