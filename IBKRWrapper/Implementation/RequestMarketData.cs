@@ -8,6 +8,11 @@ namespace IBKRWrapper
     {
         public LiveMarketData RequestMarketData(Contract contract)
         {
+            if (LastMarketDataTypeRequested != MarketDataType.Live)
+            {
+                SetMarketDataLive();
+            }
+            
             int reqId;
             lock (_reqIdLock)
             {
@@ -15,6 +20,31 @@ namespace IBKRWrapper
             }
 
             LiveMarketData data = new(reqId, contract);
+
+            StringMarketDataEvent += data.UpdateMarketData;
+            DecimalMarketDataEvent += data.UpdateMarketData;
+            DoubleMarketDataEvent += data.UpdateMarketData;
+            OptionGreeksMarketDataEvent += data.UpdateMarketData;
+
+            clientSocket.reqMktData(reqId, contract, "", false, false, null);
+
+            return data;
+        }
+
+        public FrozenMarketData RequestFrozenMarketData(Contract contract)
+        {
+            if (LastMarketDataTypeRequested != MarketDataType.Frozen)
+            {
+                SetMarketDataFrozen();
+            }
+        
+            int reqId;
+            lock (_reqIdLock)
+            {
+                reqId = _reqId++;
+            }
+
+            FrozenMarketData data = new(reqId, contract);
 
             StringMarketDataEvent += data.UpdateMarketData;
             DecimalMarketDataEvent += data.UpdateMarketData;
@@ -53,10 +83,10 @@ namespace IBKRWrapper
             return tcs.Task;
         }
 
-        public void SetMarketDataLive() => clientSocket.reqMarketDataType(1);
-        public void SetMarketDataFrozen() => clientSocket.reqMarketDataType(2);
-        public void SetMarketDataDelayed() => clientSocket.reqMarketDataType(3);
-        public void SetMarketDataDelayedFrozen() => clientSocket.reqMarketDataType(4);
+        public void SetMarketDataLive() => { clientSocket.reqMarketDataType(1); LastMarketDataTypeRequested = MarketDataType.Live; }
+        public void SetMarketDataFrozen() => { clientSocket.reqMarketDataType(2); LastMarketDataTypeRequested = MarketDataType.Frozen; }
+        public void SetMarketDataDelayed() => { clientSocket.reqMarketDataType(3); LastMarketDataTypeRequested = MarketDataType.Delayed; }
+        public void SetMarketDataDelayedFrozen() => { clientSocket.reqMarketDataType(4); LastMarketDataTypeRequested = MarketDataType.DelayedFrozen; }
 
         public event EventHandler<MarketDataEventArgs<double>>? DoubleMarketDataEvent;
         public event EventHandler<MarketDataEventArgs<decimal>>? DecimalMarketDataEvent;
