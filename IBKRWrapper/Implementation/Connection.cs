@@ -1,4 +1,5 @@
 ﻿using IBApi;
+using IBKRWrapper.Constants;
 
 namespace IBKRWrapper
 {
@@ -10,6 +11,7 @@ namespace IBKRWrapper
         public EReader? reader;
         private int _reqId;
         private readonly object _reqIdLock = new();
+        private MarketDataType _marketDataTypeRequested = MarketDataType.Live;
 
         public Wrapper()
         {
@@ -27,6 +29,12 @@ namespace IBKRWrapper
         {
             get => _nextOrderId;
             set => _nextOrderId = value;
+        }
+
+        public MarketDataType LastMarketDataTypeRequested
+        {
+            get => _marketDataTypeRequested;
+            private set => _marketDataTypeRequested = value;
         }
 
         public void nextValidId(int orderId)
