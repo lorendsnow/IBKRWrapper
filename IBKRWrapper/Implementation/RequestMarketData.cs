@@ -53,6 +53,11 @@ namespace IBKRWrapper
             return tcs.Task;
         }
 
+        public void SetMarketDataLive() => clientSocket.reqMarketDataType(1);
+        public void SetMarketDataFrozen() => clientSocket.reqMarketDataType(2);
+        public void SetMarketDataDelayed() => clientSocket.reqMarketDataType(3);
+        public void SetMarketDataDelayedFrozen() => clientSocket.reqMarketDataType(4);
+
         public event EventHandler<MarketDataEventArgs<double>>? DoubleMarketDataEvent;
         public event EventHandler<MarketDataEventArgs<decimal>>? DecimalMarketDataEvent;
         public event EventHandler<MarketDataEventArgs<string>>? StringMarketDataEvent;
