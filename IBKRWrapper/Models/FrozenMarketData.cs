@@ -91,7 +91,7 @@ namespace IBKRWrapper.Models
                     break;
 
                 case StandardTickIds.Volume:
-                    Volumes = e.Data.Value;
+                    Volume = e.Data.Value;
                     break;
 
                 default:

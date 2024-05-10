@@ -13,7 +13,7 @@ namespace IBKRWrapper
             {
                 SetMarketDataLive();
             }
-            
+
             int reqId;
             lock (_reqIdLock)
             {
@@ -38,7 +38,7 @@ namespace IBKRWrapper
             {
                 SetMarketDataFrozen();
             }
-        
+
             int reqId;
             lock (_reqIdLock)
             {
@@ -84,10 +84,26 @@ namespace IBKRWrapper
             return tcs.Task;
         }
 
-        public void SetMarketDataLive() => { clientSocket.reqMarketDataType(1); LastMarketDataTypeRequested = MarketDataType.Live; }
-        public void SetMarketDataFrozen() => { clientSocket.reqMarketDataType(2); LastMarketDataTypeRequested = MarketDataType.Frozen; }
-        public void SetMarketDataDelayed() => { clientSocket.reqMarketDataType(3); LastMarketDataTypeRequested = MarketDataType.Delayed; }
-        public void SetMarketDataDelayedFrozen() => { clientSocket.reqMarketDataType(4); LastMarketDataTypeRequested = MarketDataType.DelayedFrozen; }
+        public void SetMarketDataLive()
+        {
+            clientSocket.reqMarketDataType(1);
+            LastMarketDataTypeRequested = MarketDataType.Live;
+        }
+        public void SetMarketDataFrozen()
+        {
+            clientSocket.reqMarketDataType(2);
+            LastMarketDataTypeRequested = MarketDataType.Frozen;
+        }
+        public void SetMarketDataDelayed()
+        {
+            clientSocket.reqMarketDataType(3);
+            LastMarketDataTypeRequested = MarketDataType.Delayed;
+        }
+        public void SetMarketDataDelayedFrozen()
+        {
+            clientSocket.reqMarketDataType(4);
+            LastMarketDataTypeRequested = MarketDataType.DelayedFrozen;
+        }
 
         public event EventHandler<MarketDataEventArgs<double>>? DoubleMarketDataEvent;
         public event EventHandler<MarketDataEventArgs<decimal>>? DecimalMarketDataEvent;
