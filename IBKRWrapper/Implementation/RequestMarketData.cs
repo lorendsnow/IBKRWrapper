@@ -1,104 +1,30 @@
 using IBApi;
+using IBKRWrapper.Constants;
 using IBKRWrapper.Events;
 using IBKRWrapper.Models;
-using IBKRWrapper.Constants;
 
 namespace IBKRWrapper
 {
     public partial class Wrapper : EWrapper
     {
-        public LiveMarketData RequestMarketData(Contract contract)
-        {
-            if (LastMarketDataTypeRequested != MarketDataType.Live)
-            {
-                SetMarketDataLive();
-            }
-
-            int reqId;
-            lock (_reqIdLock)
-            {
-                reqId = _reqId++;
-            }
-
-            LiveMarketData data = new(reqId, contract);
-
-            StringMarketDataEvent += data.UpdateMarketData;
-            DecimalMarketDataEvent += data.UpdateMarketData;
-            DoubleMarketDataEvent += data.UpdateMarketData;
-            OptionGreeksMarketDataEvent += data.UpdateMarketData;
-
-            clientSocket.reqMktData(reqId, contract, "", false, false, null);
-
-            return data;
-        }
-
-        public FrozenMarketData RequestFrozenMarketData(Contract contract)
-        {
-            if (LastMarketDataTypeRequested != MarketDataType.Frozen)
-            {
-                SetMarketDataFrozen();
-            }
-
-            int reqId;
-            lock (_reqIdLock)
-            {
-                reqId = _reqId++;
-            }
-
-            FrozenMarketData data = new(reqId, contract);
-
-            StringMarketDataEvent += data.UpdateMarketData;
-            DecimalMarketDataEvent += data.UpdateMarketData;
-            DoubleMarketDataEvent += data.UpdateMarketData;
-            OptionGreeksMarketDataEvent += data.UpdateMarketData;
-
-            clientSocket.reqMktData(reqId, contract, "", false, false, null);
-
-            return data;
-        }
-
-        public Task<OptionGreeks> CalculateOptionIV(Contract contract, double optionPrice, double underlyingPrice)
-        {
-            int reqId;
-            lock (_reqIdLock)
-            {
-                reqId = _reqId++;
-            }
-
-            TaskCompletionSource<OptionGreeks> tcs = new();
-
-            EventHandler<MarketDataEventArgs<OptionGreeks>> handler = (sender, e) =>
-            {
-                if (e.Data.ReqId == reqId) tcs.SetResult(e.Data.Value);
-            };
-
-            OptionGreeksMarketDataEvent += handler;
-
-            tcs.Task.ContinueWith(t =>
-            {
-                OptionGreeksMarketDataEvent -= handler;
-            });
-
-            clientSocket.calculateImpliedVolatility(reqId, contract, optionPrice, underlyingPrice, null);
-
-            return tcs.Task;
-        }
-
         public void SetMarketDataLive()
         {
             clientSocket.reqMarketDataType(1);
             LastMarketDataTypeRequested = MarketDataType.Live;
         }
+
         public void SetMarketDataFrozen()
         {
             clientSocket.reqMarketDataType(2);
             LastMarketDataTypeRequested = MarketDataType.Frozen;
         }
+
         public void SetMarketDataDelayed()
         {
             clientSocket.reqMarketDataType(3);
             LastMarketDataTypeRequested = MarketDataType.Delayed;
         }
+
         public void SetMarketDataDelayedFrozen()
         {
             clientSocket.reqMarketDataType(4);

@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="SimpleBroker.Tests\**" />
+    <EmbeddedResource Remove="SimpleBroker.Tests\**" />
+    <None Remove="SimpleBroker.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IBKRWrapper\IBKRWrapper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="CSharpAPI">
+      <HintPath>..\IBKRWrapper\bin\Release\net8.0\CSharpAPI.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

@@ -5,28 +5,114 @@ using IBKRWrapper.Utils;
 
 namespace IBKRWrapper.Models
 {
+    /// <summary>
+    /// Represents a general live market data subscription
+    /// </summary>
+    /// <param name="reqId"></param>
+    /// <param name="contract"></param>
+    /// <remarks>Receives and stores bid, ask, last, low, high, volume, close and open ticks. If the underlying security is an option, it also holds bid, ask and last greek values</remarks>
     public class LiveMarketData(int reqId, Contract contract)
     {
+        /// <summary>
+        /// The request ID sent to IBKR when requesting market data
+        /// </summary>
         public int ReqId { get; init; } = reqId;
+
+        /// <summary>
+        /// The underlying contract
+        /// </summary>
         public Contract Contract { get; init; } = contract;
+
+        /// <summary>
+        /// List of bid prices received from IBKR
+        /// </summary>
         public List<double> BidPrices { get; private set; } = [];
+
+        /// <summary>
+        /// List of bid sizes received from IBKR
+        /// </summary>
         public List<decimal> BidSizes { get; private set; } = [];
+
+        /// <summary>
+        /// List of ask prices received from IBKR
+        /// </summary>
         public List<double> AskPrices { get; private set; } = [];
+
+        /// <summary>
+        /// List of ask sizes received from IBKR
+        /// </summary>
         public List<decimal> AskSizes { get; private set; } = [];
+
+        /// <summary>
+        /// List of last trade prices received from IBKR
+        /// </summary>
         public List<double> LastPrices { get; private set; } = [];
+
+        /// <summary>
+        /// List of last trade sizes received from IBKR
+        /// </summary>
         public List<decimal> LastSizes { get; private set; } = [];
+
+        /// <summary>
+        /// High price for the day
+        /// </summary>
         public List<double> Highs { get; private set; } = [];
+
+        /// <summary>
+        /// Low price for the day
+        /// </summary>
         public List<double> Lows { get; private set; } = [];
+
+        /// <summary>
+        /// Trading volume for the day
+        /// </summary>
         public List<decimal> Volumes { get; private set; } = [];
+
+        /// <summary>
+        /// The closing price for the day
+        /// </summary>
         public double? CloseTick { get; private set; }
+
+        /// <summary>
+        /// The opening price for the day
+        /// </summary>
         public double? OpenTick { get; private set; }
+
+        /// <summary>
+        /// Timestamps for time of last trade
+        /// </summary>
         public List<DateTimeOffset> TimeStamps { get; private set; } = [];
+
+        /// <summary>
+        /// List of bid greeks received from IBKR
+        /// </summary>
         public List<OptionGreeks> BidGreeks { get; private set; } = [];
+
+        /// <summary>
+        /// List of ask greeks received from IBKR
+        /// </summary>
         public List<OptionGreeks> AskGreeks { get; private set; } = [];
+
+        /// <summary>
+        /// List of last trade greeks received from IBKR
+        /// </summary>
         public List<OptionGreeks> LastGreeks { get; private set; } = [];
+
+        /// <summary>
+        /// List of model greeks received from IBKR
+        /// </summary>
         public List<OptionGreeks> ModelGreeks { get; private set; } = [];
+
+        /// <summary>
+        /// Whether trading in the security is halted
+        /// </summary>
         public bool Halted { get; private set; }
 
+        /// <summary>
+        /// Handles and stores <see cref="double"/> tick values emitted by IBKR
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void UpdateMarketData(object? sender, MarketDataEventArgs<double> e)
         {
             if (e.Data.ReqId != ReqId)
@@ -71,6 +157,11 @@ namespace IBKRWrapper.Models
             }
         }
 
+        /// <summary>
+        /// Handles and stores <see cref="decimal"/> tick values emitted by IBKR
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void UpdateMarketData(object? sender, MarketDataEventArgs<decimal> e)
         {
             if (e.Data.ReqId != ReqId)
@@ -99,6 +190,11 @@ namespace IBKRWrapper.Models
             }
         }
 
+        /// <summary>
+        /// Handles and stores <see cref="OptionGreeks"/> tick values emitted by IBKR
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void UpdateMarketData(object? sender, MarketDataEventArgs<OptionGreeks> e)
         {
             if (e.Data.ReqId != ReqId)
@@ -127,6 +223,11 @@ namespace IBKRWrapper.Models
             }
         }
 
+        /// <summary>
+        /// Handles and stores <see cref="string"/> tick values emitted by IBKR
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void UpdateMarketData(object? sender, MarketDataEventArgs<string> e)
         {
             if (e.Data.ReqId != ReqId)

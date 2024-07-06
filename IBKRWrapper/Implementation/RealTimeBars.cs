@@ -6,28 +6,6 @@ namespace IBKRWrapper
 {
     public partial class Wrapper : EWrapper
     {
-        public RealTimeBarList GetRealTimeBars(
-            Contract contract,
-            int barSize,
-            string whatToShow,
-            bool useRTH
-        )
-        {
-            int reqId;
-            lock (_reqIdLock)
-            {
-                reqId = _reqId++;
-            }
-
-            RealTimeBarList rtBars = new(reqId, contract, barSize, whatToShow, useRTH);
-
-            RealTimeBarEvent += rtBars.HandleNewBar;
-
-            clientSocket.reqRealTimeBars(reqId, contract, barSize, whatToShow, useRTH, null);
-
-            return rtBars;
-        }
-
         public event EventHandler<RealTimeBarEventArgs>? RealTimeBarEvent;
 
         public virtual void realtimeBar(

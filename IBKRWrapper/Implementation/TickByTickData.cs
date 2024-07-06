@@ -6,23 +6,6 @@ namespace IBKRWrapper
 {
     public partial class Wrapper : EWrapper
     {
-        public TickDataList GetTickByTickData(Contract contract, string tickType)
-        {
-            int reqId;
-            lock (_reqIdLock)
-            {
-                reqId = _reqId++;
-            }
-
-            TickDataList tickDataList = new(reqId, contract, tickType);
-
-            TickByTickEvent += tickDataList.HandleNewTick;
-
-            clientSocket.reqTickByTickData(reqId, contract, tickType, 0, false);
-
-            return tickDataList;
-        }
-
         public event EventHandler<TickByTickEventArgs>? TickByTickEvent;
 
         public void tickByTickAllLast(

@@ -26,7 +26,7 @@ namespace IBKRWrapper.Models
 
         public void CancelTickData(Wrapper wrapper)
         {
-            wrapper.ClientSocket.cancelTickByTickData(ReqId);
+            wrapper.ClientSocket.clientSocket.cancelTickByTickData(ReqId);
         }
 
         public override string ToString()

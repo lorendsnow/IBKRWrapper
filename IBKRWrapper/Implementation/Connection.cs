@@ -6,23 +6,22 @@ namespace IBKRWrapper
     public partial class Wrapper : EWrapper
     {
         private int _nextOrderId;
-        EClientSocket clientSocket;
+        IClientSocket clientSocket;
         public readonly EReaderSignal Signal;
         public EReader? reader;
         private int _reqId;
-        private readonly object _reqIdLock = new();
         private MarketDataType _marketDataTypeRequested = MarketDataType.Live;
 
         public Wrapper()
         {
             Signal = new EReaderMonitorSignal();
-            clientSocket = new EClientSocket(this, Signal);
+            clientSocket = new ClientSocket(this, Signal);
         }
 
-        public EClientSocket ClientSocket
+        public IClientSocket ClientSocket
         {
-            get { return clientSocket; }
-            set { clientSocket = value; }
+            get => clientSocket;
+            set => clientSocket = value;
         }
 
         public int NextOrderId
@@ -30,6 +29,14 @@ namespace IBKRWrapper
             get => _nextOrderId;
             set => _nextOrderId = value;
         }
+
+        public int ReqId
+        {
+            get => _reqId;
+            set => _reqId = value;
+        }
+
+        public bool IsConnected => clientSocket.IsConnected();
 
         public MarketDataType LastMarketDataTypeRequested
         {
@@ -46,7 +53,7 @@ namespace IBKRWrapper
         {
             clientSocket.eConnect(host, port, clientId);
 
-            EReader reader = new(clientSocket, Signal);
+            EReader reader = new(ClientSocket.clientSocket, Signal);
             reader.Start();
 
             new Thread(() =>

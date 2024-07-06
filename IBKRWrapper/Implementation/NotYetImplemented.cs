@@ -362,8 +362,8 @@ namespace IBKRWrapper
         //! [connectack]
         public void connectAck()
         {
-            if (ClientSocket.AsyncEConnect)
-                ClientSocket.startApi();
+            if (ClientSocket.clientSocket.AsyncEConnect)
+                ClientSocket.clientSocket.startApi();
         }
 
         //! [connectack]
