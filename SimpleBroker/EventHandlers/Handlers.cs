@@ -45,7 +45,7 @@ namespace SimpleBroker.EventHandlers
             {
                 if (e.ReqId == reqId)
                 {
-                    contracts.Add(e.Details.Contract);
+                    contracts.Add(e.Details.Contract.ToBrokerContract());
                 }
             };
         }
@@ -246,7 +246,7 @@ namespace SimpleBroker.EventHandlers
 
         internal static EventHandler<PositionEventArgs> PositionHandler(List<Position> positions)
         {
-            return (sender, e) => positions.Add(e.Position);
+            return (sender, e) => positions.Add(e.Position.ToBrokerPosition());
         }
 
         internal static EventHandler PositionEndHandler(
@@ -285,7 +285,7 @@ namespace SimpleBroker.EventHandlers
             List<PortfolioPosition> positions
         )
         {
-            return (sender, e) => positions.Add(e.Position);
+            return (sender, e) => positions.Add(e.Position.ToBrokerPortfolioPosition());
         }
     }
 }
