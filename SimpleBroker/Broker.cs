@@ -24,6 +24,9 @@ namespace SimpleBroker
             get => _wrapper.IsConnected;
         }
 
+        /// <summary>
+        /// Public constructor for the <see cref="Broker"/> class.
+        /// </summary>
         public Broker()
         {
             _wrapper = new Wrapper();
@@ -66,7 +69,7 @@ namespace SimpleBroker
         /// </summary>
         /// <param name="account">The IBKR account number to get positions for</param>
         /// <returns>A dictionary of <see cref="string"/> name/value pairs</returns>
-        public Task<Dictionary<string, string>> GetAccountValuesAsync(string account)
+        public Task<Dictionary<string, string>> GetAccountValues(string account)
         {
             TaskCompletionSource<Dictionary<string, string>> tcs = new();
             lock (_locks.accountValuesLock)
@@ -138,7 +141,7 @@ namespace SimpleBroker
         /// </summary>
         /// <returns>A list of <see cref="Position"/> objects</returns>
         /// <remarks>
-        ///     The primary reason to call this method instead of <see cref="GetPortfolioPositions"/> is to get the positions for all accounts. <see cref="GetPortfolioPositions"/> makes you enter an account number and will return positions only for that account
+        ///     The primary reason to call this method instead of <see cref="GetPortfolioPositions"/> is to get a quick list of positions for all accounts. <see cref="GetPortfolioPositions"/> makes you enter an account number and will return positions only for that account, and also includes PnL information on each position.
         /// </remarks>
         public Task<List<Position>> GetPositions()
         {
@@ -234,7 +237,7 @@ namespace SimpleBroker
             TaskCompletionSource<List<Contract>> tcs = new();
             List<Contract> contracts = [];
 
-            Contract contract =
+            IBApi.Contract contract =
                 new()
                 {
                     Symbol = symbol,
@@ -268,8 +271,109 @@ namespace SimpleBroker
         /// Gets the fully defined contracts (i.e., with all details included) for an option on a specific date.
         /// </summary>
         /// <param name="symbol">The underlying's symbol</param>
+        /// <param name="date">The option expiration date, in the format "YYYYMMDD"</param>
+        /// <param name="right">The option's right, entered as "PUT", "P", "CALL", or "C"</param>
+        /// <param name="exchange">The option's exchange</param>
+        /// <param name="currency">The option's currency</param>
+        /// <returns>A list of <see cref="Contract"/> objects.</returns>
+        /// <remarks>
+        ///     <para>Valid values for the "right" parameter are "P", "PUT", "C" or "CALL"</para>
+        ///     <para>The date should passed in the format "YYYYMMDD"</para>
+        ///     <list type="table">
+        ///         <listheader><description>Security Type Definitions:</description></listheader>
+        ///         <item>
+        ///             <term>STK</term><description> Stock or ETF</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>OPT</term><description> Option</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>FUT</term><description> Future</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>IND</term><description> Index</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>FOP</term><description> Futures Option</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>CASH</term><description> Forex Pair</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>BAG</term><description> Combo</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>WAR</term><description> Warrant</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>BOND</term><description> Bond</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>CMDTY</term><description> Commodity</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>NEWS</term><description> News</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>FUND</term><description> Mutual Fund</description>
+        ///         </item>
+        ///     </list>
+        /// </remarks>
+        public Task<List<Contract>> GetFullyDefinedOptionContractsByDate(
+            string symbol,
+            string date,
+            string right,
+            string exchange = "SMART",
+            string currency = "USD"
+        )
+        {
+            int reqId;
+            lock (_locks.reqIdLock)
+            {
+                reqId = _wrapper.ReqId++;
+            }
+
+            TaskCompletionSource<List<Contract>> tcs = new();
+            List<Contract> contracts = [];
+
+            IBApi.Contract contract =
+                new()
+                {
+                    Symbol = symbol,
+                    SecType = "OPT",
+                    LastTradeDateOrContractMonth = date,
+                    Right = right,
+                    Exchange = exchange,
+                    Currency = currency
+                };
+
+            var contractDetailsHandler = Handlers.ContractDetailsHandler(contracts, reqId);
+            var contractDetailsEndHandler = Handlers.ContractDetailsEndHandler(
+                contracts,
+                reqId,
+                tcs
+            );
+
+            _wrapper.ContractDetailsEvent += contractDetailsHandler;
+            _wrapper.ContractDetailsEndEvent += contractDetailsEndHandler;
+
+            tcs.Task.ContinueWith(t =>
+            {
+                _wrapper.ContractDetailsEvent -= contractDetailsHandler;
+                _wrapper.ContractDetailsEndEvent -= contractDetailsEndHandler;
+            });
+
+            _wrapper.ClientSocket.reqContractDetails(reqId, contract);
+
+            return tcs.Task;
+        }
+
+        /// <summary>
+        /// Gets the fully defined contracts (i.e., with all details included) for an option on a specific date.
+        /// </summary>
+        /// <param name="symbol">The underlying's symbol</param>
         /// <param name="date">The option expiration date</param>
-        /// <param name="right">The right (i.e., put or call)</param>
+        /// <param name="right">The option's right, entered as "PUT", "P", "CALL", or "C"</param>
         /// <param name="exchange">The option's exchange</param>
         /// <param name="currency">The option's currency</param>
         /// <returns>A list of <see cref="Contract"/> objects.</returns>
@@ -315,9 +419,9 @@ namespace SimpleBroker
         ///         </item>
         ///     </list>
         /// </remarks>
-        public Task<List<Contract>> GetfullyDefinedOptionContractsByDate(
+        public Task<List<Contract>> GetFullyDefinedOptionContractsByDate(
             string symbol,
-            string date,
+            DateTime date,
             string right,
             string exchange = "SMART",
             string currency = "USD"
@@ -332,12 +436,212 @@ namespace SimpleBroker
             TaskCompletionSource<List<Contract>> tcs = new();
             List<Contract> contracts = [];
 
-            Contract contract =
+            IBApi.Contract contract =
                 new()
                 {
                     Symbol = symbol,
                     SecType = "OPT",
-                    LastTradeDateOrContractMonth = date,
+                    LastTradeDateOrContractMonth = date.ToString("yyyyMMdd"),
+                    Right = right,
+                    Exchange = exchange,
+                    Currency = currency
+                };
+
+            var contractDetailsHandler = Handlers.ContractDetailsHandler(contracts, reqId);
+            var contractDetailsEndHandler = Handlers.ContractDetailsEndHandler(
+                contracts,
+                reqId,
+                tcs
+            );
+
+            _wrapper.ContractDetailsEvent += contractDetailsHandler;
+            _wrapper.ContractDetailsEndEvent += contractDetailsEndHandler;
+
+            tcs.Task.ContinueWith(t =>
+            {
+                _wrapper.ContractDetailsEvent -= contractDetailsHandler;
+                _wrapper.ContractDetailsEndEvent -= contractDetailsEndHandler;
+            });
+
+            _wrapper.ClientSocket.reqContractDetails(reqId, contract);
+
+            return tcs.Task;
+        }
+
+        /// <summary>
+        /// Gets the fully defined contracts (i.e., with all details included) for an option on a specific date.
+        /// </summary>
+        /// <param name="symbol">The underlying's symbol</param>
+        /// <param name="date">The option expiration date</param>
+        /// <param name="right">The option's right, entered as "PUT", "P", "CALL", or "C"</param>
+        /// <param name="exchange">The option's exchange</param>
+        /// <param name="currency">The option's currency</param>
+        /// <returns>A list of <see cref="Contract"/> objects.</returns>
+        /// <remarks>
+        ///     <para>Valid values for the "right" parameter are "P", "PUT", "C" or "CALL"</para>
+        ///     <list type="table">
+        ///         <listheader><description>Security Type Definitions:</description></listheader>
+        ///         <item>
+        ///             <term>STK</term><description> Stock or ETF</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>OPT</term><description> Option</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>FUT</term><description> Future</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>IND</term><description> Index</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>FOP</term><description> Futures Option</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>CASH</term><description> Forex Pair</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>BAG</term><description> Combo</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>WAR</term><description> Warrant</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>BOND</term><description> Bond</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>CMDTY</term><description> Commodity</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>NEWS</term><description> News</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>FUND</term><description> Mutual Fund</description>
+        ///         </item>
+        ///     </list>
+        /// </remarks>
+        public Task<List<Contract>> GetFullyDefinedOptionContractsByDate(
+            string symbol,
+            DateOnly date,
+            string right,
+            string exchange = "SMART",
+            string currency = "USD"
+        )
+        {
+            int reqId;
+            lock (_locks.reqIdLock)
+            {
+                reqId = _wrapper.ReqId++;
+            }
+
+            TaskCompletionSource<List<Contract>> tcs = new();
+            List<Contract> contracts = [];
+
+            IBApi.Contract contract =
+                new()
+                {
+                    Symbol = symbol,
+                    SecType = "OPT",
+                    LastTradeDateOrContractMonth = date.ToString("yyyyMMdd"),
+                    Right = right,
+                    Exchange = exchange,
+                    Currency = currency
+                };
+
+            var contractDetailsHandler = Handlers.ContractDetailsHandler(contracts, reqId);
+            var contractDetailsEndHandler = Handlers.ContractDetailsEndHandler(
+                contracts,
+                reqId,
+                tcs
+            );
+
+            _wrapper.ContractDetailsEvent += contractDetailsHandler;
+            _wrapper.ContractDetailsEndEvent += contractDetailsEndHandler;
+
+            tcs.Task.ContinueWith(t =>
+            {
+                _wrapper.ContractDetailsEvent -= contractDetailsHandler;
+                _wrapper.ContractDetailsEndEvent -= contractDetailsEndHandler;
+            });
+
+            _wrapper.ClientSocket.reqContractDetails(reqId, contract);
+
+            return tcs.Task;
+        }
+
+        /// <summary>
+        /// Gets the fully defined contracts (i.e., with all details included) for an option on a specific date.
+        /// </summary>
+        /// <param name="symbol">The underlying's symbol</param>
+        /// <param name="date">The option expiration date</param>
+        /// <param name="right">The option's right, entered as "PUT", "P", "CALL", or "C"</param>
+        /// <param name="exchange">The option's exchange</param>
+        /// <param name="currency">The option's currency</param>
+        /// <returns>A list of <see cref="Contract"/> objects.</returns>
+        /// <remarks>
+        ///     <para>Valid values for the "right" parameter are "P", "PUT", "C" or "CALL"</para>
+        ///     <list type="table">
+        ///         <listheader><description>Security Type Definitions:</description></listheader>
+        ///         <item>
+        ///             <term>STK</term><description> Stock or ETF</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>OPT</term><description> Option</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>FUT</term><description> Future</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>IND</term><description> Index</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>FOP</term><description> Futures Option</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>CASH</term><description> Forex Pair</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>BAG</term><description> Combo</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>WAR</term><description> Warrant</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>BOND</term><description> Bond</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>CMDTY</term><description> Commodity</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>NEWS</term><description> News</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>FUND</term><description> Mutual Fund</description>
+        ///         </item>
+        ///     </list>
+        /// </remarks>
+        public Task<List<Contract>> GetFullyDefinedOptionContractsByDate(
+            string symbol,
+            DateTimeOffset date,
+            string right,
+            string exchange = "SMART",
+            string currency = "USD"
+        )
+        {
+            int reqId;
+            lock (_locks.reqIdLock)
+            {
+                reqId = _wrapper.ReqId++;
+            }
+
+            TaskCompletionSource<List<Contract>> tcs = new();
+            List<Contract> contracts = [];
+
+            IBApi.Contract contract =
+                new()
+                {
+                    Symbol = symbol,
+                    SecType = "OPT",
+                    LastTradeDateOrContractMonth = date.ToString("yyyyMMdd"),
                     Right = right,
                     Exchange = exchange,
                     Currency = currency
@@ -612,7 +916,7 @@ namespace SimpleBroker
 
             _wrapper.ClientSocket.reqHistoricalData(
                 reqId,
-                contract,
+                contract.ToIBKRContract(),
                 endDateTime,
                 durationString,
                 barSizeSetting,
@@ -639,7 +943,7 @@ namespace SimpleBroker
         /// <param name="startDateTime">The request's start date and time</param>
         /// <param name="endDateTime">The request's end date and time</param>
         /// <param name="numberOfTicks">Total number of distinct data points (max is 1000)</param>
-        /// <param name="useRTH">Whether to use real time hours only (true) or not (false)</param>
+        /// <param name="useRth">Whether to use real time hours only (true) or not (false)</param>
         /// <returns>A list of <see cref="HistoricalTickLast"/> objects.</returns>
         /// <remarks>
         ///     <para><b>Parameter Notes:</b></para>
@@ -676,7 +980,7 @@ namespace SimpleBroker
 
             _wrapper.ClientSocket.reqHistoricalTicks(
                 reqId,
-                contract,
+                contract.ToIBKRContract(),
                 startDateTime,
                 endDateTime,
                 numberOfTicks,
@@ -702,7 +1006,7 @@ namespace SimpleBroker
         /// <param name="startDateTime">The request's start date and time</param>
         /// <param name="endDateTime">The request's end date and time</param>
         /// <param name="numberOfTicks">Total number of distinct data points (max is 1000)</param>
-        /// <param name="useRTH">Whether to use real time hours only (true) or not (false)</param>
+        /// <param name="useRth">Whether to use real time hours only (true) or not (false)</param>
         /// <param name="ignoreSize">Whether to ignore the size of the bid/ask (true) or not (false)</param>
         /// <returns>A list of <see cref="HistoricalTickBidAsk"/> objects.</returns>
         /// <remarks>
@@ -740,7 +1044,7 @@ namespace SimpleBroker
             int rth = useRth ? 1 : 0;
             _wrapper.ClientSocket.reqHistoricalTicks(
                 reqId,
-                contract,
+                contract.ToIBKRContract(),
                 startDateTime,
                 endDateTime,
                 numberOfTicks,
@@ -766,7 +1070,7 @@ namespace SimpleBroker
         /// <param name="startDateTime">The request's start date and time</param>
         /// <param name="endDateTime">The request's end date and time</param>
         /// <param name="numberOfTicks">Total number of distinct data points (max is 1000)</param>
-        /// <param name="useRTH">Whether to use real time hours only (true) or not (false)</param>
+        /// <param name="useRth">Whether to use real time hours only (true) or not (false)</param>
         /// <returns>A list of <see cref="HistoricalTick"/> objects.</returns>
         /// <remarks>
         ///     <para><b>Parameter Notes:</b></para>
@@ -802,7 +1106,7 @@ namespace SimpleBroker
             int rth = useRth ? 1 : 0;
             _wrapper.ClientSocket.reqHistoricalTicks(
                 reqId,
-                contract,
+                contract.ToIBKRContract(),
                 startDateTime,
                 endDateTime,
                 numberOfTicks,
@@ -906,7 +1210,13 @@ namespace SimpleBroker
             });
 
             int rth = useRTH ? 1 : 0;
-            _wrapper.ClientSocket.reqHeadTimestamp(reqId, contract, whatToShow, rth, formatDate);
+            _wrapper.ClientSocket.reqHeadTimestamp(
+                reqId,
+                contract.ToIBKRContract(),
+                whatToShow,
+                rth,
+                formatDate
+            );
 
             return tcs.Task;
         }
@@ -938,11 +1248,19 @@ namespace SimpleBroker
                 reqId = _wrapper.ReqId++;
             }
 
-            RealTimeBarList rtBars = new(reqId, contract, BARSIZE, whatToShow, useRTH);
+            RealTimeBarList rtBars =
+                new(reqId, contract.ToIBKRContract(), BARSIZE, whatToShow, useRTH);
 
             _wrapper.RealTimeBarEvent += rtBars.HandleNewBar;
 
-            _wrapper.ClientSocket.reqRealTimeBars(reqId, contract, BARSIZE, whatToShow, useRTH, []);
+            _wrapper.ClientSocket.reqRealTimeBars(
+                reqId,
+                contract.ToIBKRContract(),
+                BARSIZE,
+                whatToShow,
+                useRTH,
+                []
+            );
 
             return rtBars;
         }
@@ -950,7 +1268,7 @@ namespace SimpleBroker
         /// <summary>
         /// Request real-time watchlist market data for a contract.
         /// </summary>
-        /// <param name="contract">Contract for the instrument for which data is being requested</param>
+        /// <param name="contract"><see cref="Contract"/> for the instrument for which data is being requested</param>
         /// <returns>A <see cref="LiveMarketData"/> object which receives and stores data emitted by IBKR</returns>
         public LiveMarketData RequestMarketData(Contract contract)
         {
@@ -972,7 +1290,14 @@ namespace SimpleBroker
             _wrapper.DoubleMarketDataEvent += data.UpdateMarketData;
             _wrapper.OptionGreeksMarketDataEvent += data.UpdateMarketData;
 
-            _wrapper.ClientSocket.reqMktData(reqId, contract, "", false, false, []);
+            _wrapper.ClientSocket.reqMktData(
+                reqId,
+                contract.ToIBKRContract(),
+                "",
+                false,
+                false,
+                []
+            );
 
             return data;
         }
@@ -998,14 +1323,21 @@ namespace SimpleBroker
                 reqId = _wrapper.ReqId++;
             }
 
-            FrozenMarketData data = new(reqId, contract);
+            FrozenMarketData data = new(reqId, contract.ToIBKRContract());
 
             _wrapper.StringMarketDataEvent += data.UpdateMarketData;
             _wrapper.DecimalMarketDataEvent += data.UpdateMarketData;
             _wrapper.DoubleMarketDataEvent += data.UpdateMarketData;
             _wrapper.OptionGreeksMarketDataEvent += data.UpdateMarketData;
 
-            _wrapper.ClientSocket.reqMktData(reqId, contract, "", false, false, []);
+            _wrapper.ClientSocket.reqMktData(
+                reqId,
+                contract.ToIBKRContract(),
+                "",
+                false,
+                false,
+                []
+            );
 
             return data;
         }
@@ -1034,10 +1366,10 @@ namespace SimpleBroker
 
             TaskCompletionSource<OptionGreeks> tcs = new();
 
-            void handler(object? sender, MarketDataEventArgs<OptionGreeks> e)
+            void handler(object? sender, MarketDataEventArgs<IBKRWrapper.Models.OptionGreeks> e)
             {
                 if (e.Data.ReqId == reqId)
-                    tcs.SetResult(e.Data.Value);
+                    tcs.SetResult(e.Data.Value.ToBrokerOptionGreeks());
             }
 
             _wrapper.OptionGreeksMarketDataEvent += handler;
@@ -1049,7 +1381,7 @@ namespace SimpleBroker
 
             _wrapper.ClientSocket.calculateImpliedVolatility(
                 reqId,
-                contract,
+                contract.ToIBKRContract(),
                 optionPrice,
                 underlyingPrice,
                 []
@@ -1097,11 +1429,17 @@ namespace SimpleBroker
                 reqId = _wrapper.ReqId++;
             }
 
-            TickDataList tickDataList = new(reqId, contract, tickType);
+            TickDataList tickDataList = new(reqId, contract.ToIBKRContract(), tickType);
 
             _wrapper.TickByTickEvent += tickDataList.HandleNewTick;
 
-            _wrapper.ClientSocket.reqTickByTickData(reqId, contract, tickType, 0, false);
+            _wrapper.ClientSocket.reqTickByTickData(
+                reqId,
+                contract.ToIBKRContract(),
+                tickType,
+                0,
+                false
+            );
 
             return tickDataList;
         }
@@ -1126,9 +1464,9 @@ namespace SimpleBroker
                 orderId = _wrapper.NextOrderId++;
             }
 
-            Trade trade = Trade.New(orderId, contract, order, null);
+            Trade trade = Trade.New(orderId, contract.ToIBKRContract(), order, null);
 
-            /// The trade subscribes to the order status, execution, and commission events for updates.
+            // The trade subscribes to the order status, execution, and commission events for updates.
             _wrapper.OrderStatusEvent += trade.HandleOrderStatus;
             _wrapper.ExecDetailsEvent += trade.HandleExecution;
             _wrapper.CommissionEvent += trade.HandleCommission;
@@ -1139,7 +1477,7 @@ namespace SimpleBroker
 
             tcs.Task.ContinueWith(t => _wrapper.OrderStatusEvent -= statusUpdate);
 
-            _wrapper.ClientSocket.placeOrder(orderId, contract, order);
+            _wrapper.ClientSocket.placeOrder(orderId, contract.ToIBKRContract(), order);
 
             return tcs.Task;
         }
