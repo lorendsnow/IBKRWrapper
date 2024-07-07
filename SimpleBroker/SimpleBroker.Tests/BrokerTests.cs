@@ -92,13 +92,9 @@ namespace SimpleBroker.Tests
             MockClient client = new(wrapper, wrapper.Signal);
             wrapper.ClientSocket = client;
             Broker broker = Broker.CreateNew(wrapper);
+            Contract contract = new("TSLA", "STK", "USD", "SMART");
 
-            List<Bar> bars = await broker.GetHistoricalBars(
-                MockClient.TSLAContract,
-                "1 D",
-                "1 day",
-                "TRADES"
-            );
+            List<Bar> bars = await broker.GetHistoricalBars(contract, "1 D", "1 day", "TRADES");
 
             Assert.Equal(3, bars.Count);
         }
@@ -110,9 +106,10 @@ namespace SimpleBroker.Tests
             MockClient client = new(wrapper, wrapper.Signal);
             wrapper.ClientSocket = client;
             Broker broker = Broker.CreateNew(wrapper);
+            Contract contract = new("TSLA", "STK", "USD", "SMART");
 
             List<HistoricalTickLast> ticks = await broker.GetHistoricalTicksLast(
-                MockClient.TSLAContract,
+                contract,
                 "20240101",
                 "",
                 3,
@@ -129,9 +126,10 @@ namespace SimpleBroker.Tests
             MockClient client = new(wrapper, wrapper.Signal);
             wrapper.ClientSocket = client;
             Broker broker = Broker.CreateNew(wrapper);
+            Contract contract = new("TSLA", "STK", "USD", "SMART");
 
             List<HistoricalTickBidAsk> ticks = await broker.GetHistoricalTicksBidAsk(
-                MockClient.TSLAContract,
+                contract,
                 "20240101",
                 "",
                 3,
@@ -149,9 +147,10 @@ namespace SimpleBroker.Tests
             MockClient client = new(wrapper, wrapper.Signal);
             wrapper.ClientSocket = client;
             Broker broker = Broker.CreateNew(wrapper);
+            Contract contract = new("TSLA", "STK", "USD", "SMART");
 
             List<HistoricalTick> ticks = await broker.GetHistoricalTicksMid(
-                MockClient.TSLAContract,
+                contract,
                 "20240101",
                 "",
                 3,
@@ -168,13 +167,9 @@ namespace SimpleBroker.Tests
             MockClient client = new(wrapper, wrapper.Signal);
             wrapper.ClientSocket = client;
             Broker broker = Broker.CreateNew(wrapper);
+            Contract contract = new("TSLA", "STK", "USD", "SMART");
 
-            DateTimeOffset timestamp = await broker.GetHeadTimestamp(
-                MockClient.TSLAContract,
-                "TRADES",
-                true,
-                1
-            );
+            DateTimeOffset timestamp = await broker.GetHeadTimestamp(contract, "TRADES", true, 1);
 
             Assert.Equal(new DateTime(2024, 1, 1, 9, 30, 0), timestamp.DateTime);
         }
@@ -186,7 +181,7 @@ namespace SimpleBroker.Tests
             MockClient client = new(wrapper, wrapper.Signal);
             wrapper.ClientSocket = client;
             Broker broker = Broker.CreateNew(wrapper);
-            Contract contract = MockClient.TSLAContract;
+            Contract contract = new("TSLA", "STK", "USD", "SMART");
             Order order =
                 new()
                 {
@@ -235,8 +230,9 @@ namespace SimpleBroker.Tests
             MockClient client = new(wrapper, wrapper.Signal);
             wrapper.ClientSocket = client;
             Broker broker = Broker.CreateNew(wrapper);
+            Contract contract = new("TSLA", "STK", "USD", "SMART");
 
-            RealTimeBarList bars = broker.GetRealTimeBars(MockClient.TSLAContract, "TRADES", true);
+            RealTimeBarList bars = broker.GetRealTimeBars(contract, "TRADES", true);
 
             Assert.Equal("TSLA", bars.Contract.Symbol);
             Assert.Empty(bars.Bars);
