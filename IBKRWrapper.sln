@@ -5,9 +5,9 @@ VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IBKRWrapper", "IBKRWrapper\IBKRWrapper.csproj", "{F2C28A02-99CF-4AA6-B285-E296ADA22ADC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleBroker", "SimpleBroker\SimpleBroker.csproj", "{F257FD3F-EE7B-434C-BFC1-3063CDF005E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleBroker", "SimpleBroker\SimpleBroker.csproj", "{F257FD3F-EE7B-434C-BFC1-3063CDF005E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleBroker.Tests", "SimpleBroker\SimpleBroker.Tests\SimpleBroker.Tests.csproj", "{FC9D04E7-7A79-4EF2-848D-726F354C6B18}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleBroker.Tests", "SimpleBroker\SimpleBroker.Tests\SimpleBroker.Tests.csproj", "{FC9D04E7-7A79-4EF2-848D-726F354C6B18}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,7 +38,6 @@ Global
 		{FC9D04E7-7A79-4EF2-848D-726F354C6B18}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{FC9D04E7-7A79-4EF2-848D-726F354C6B18}.Debug|x86.Build.0 = Debug|Any CPU
 		{FC9D04E7-7A79-4EF2-848D-726F354C6B18}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FC9D04E7-7A79-4EF2-848D-726F354C6B18}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FC9D04E7-7A79-4EF2-848D-726F354C6B18}.Release|x86.ActiveCfg = Release|Any CPU
 		{FC9D04E7-7A79-4EF2-848D-726F354C6B18}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
