@@ -7,7 +7,7 @@ namespace SimpleBroker.Tests
     {
         public EClientSocket clientSocket { get; set; } = new(wrapper, eReaderSignal);
 
-        public static Contract AAPLContract
+        public static IBApi.Contract AAPLContract
         {
             get =>
                 new()
@@ -21,7 +21,7 @@ namespace SimpleBroker.Tests
                 };
         }
 
-        public static List<Contract> TSLAOptContracts
+        public static List<IBApi.Contract> TSLAOptContracts
         {
             get =>
                 [
@@ -52,7 +52,7 @@ namespace SimpleBroker.Tests
                 ];
         }
 
-        public static Contract TSLAContract
+        public static IBApi.Contract TSLAContract
         {
             get =>
                 new()
@@ -66,7 +66,7 @@ namespace SimpleBroker.Tests
                 };
         }
 
-        public static Contract MSFTContract
+        public static IBApi.Contract MSFTContract
         {
             get =>
                 new()
@@ -82,7 +82,7 @@ namespace SimpleBroker.Tests
 
         public void calculateImpliedVolatility(
             int reqId,
-            Contract contract,
+            IBApi.Contract contract,
             double optionPrice,
             double underPrice,
             List<TagValue> impliedVolatilityOptions
@@ -116,7 +116,7 @@ namespace SimpleBroker.Tests
             return true;
         }
 
-        public void placeOrder(int id, Contract contract, Order order)
+        public void placeOrder(int id, IBApi.Contract contract, Order order)
         {
             wrapper.orderStatus(id, "PendingSubmit", 0m, 100m, 0, 1, 1, 0, 0, "", 100);
         }
@@ -165,7 +165,7 @@ namespace SimpleBroker.Tests
             wrapper.openOrderEnd();
         }
 
-        public void reqContractDetails(int reqId, Contract contract)
+        public void reqContractDetails(int reqId, IBApi.Contract contract)
         {
             switch (contract.Symbol)
             {
@@ -251,7 +251,7 @@ namespace SimpleBroker.Tests
 
         public void reqHeadTimestamp(
             int reqId,
-            Contract contract,
+            IBApi.Contract contract,
             string whatToShow,
             int useRTH,
             int formatDate
@@ -262,7 +262,7 @@ namespace SimpleBroker.Tests
 
         public void reqHistoricalData(
             int tickerId,
-            Contract contract,
+            IBApi.Contract contract,
             string endDateTime,
             string durationStr,
             string barSizeSetting,
@@ -290,7 +290,7 @@ namespace SimpleBroker.Tests
 
         public void reqHistoricalTicks(
             int reqId,
-            Contract contract,
+            IBApi.Contract contract,
             string startDateTime,
             string endDateTime,
             int numberOfTicks,
@@ -347,7 +347,7 @@ namespace SimpleBroker.Tests
 
         public void reqMktData(
             int tickerId,
-            Contract contract,
+            IBApi.Contract contract,
             string genericTickList,
             bool snapshot,
             bool regulatorySnaphsot,
@@ -366,7 +366,7 @@ namespace SimpleBroker.Tests
 
         public void reqRealTimeBars(
             int tickerId,
-            Contract contract,
+            IBApi.Contract contract,
             int barSize,
             string whatToShow,
             bool useRTH,
@@ -422,7 +422,7 @@ namespace SimpleBroker.Tests
 
         public void reqTickByTickData(
             int requestId,
-            Contract contract,
+            IBApi.Contract contract,
             string tickType,
             int numberOfTicks,
             bool ignoreSize
