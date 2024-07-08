@@ -1306,12 +1306,23 @@ namespace SimpleBroker
         }
 
         /// <summary>
-        /// Request frozen market data (i.e., the last data recorded, or the data recorded at market close if the request is made after market hours) for a contract.
+        /// Request frozen market data (i.e., the last data recorded, or the data recorded at
+        /// market close if the request is made after market hours) for a contract.
         /// </summary>
-        /// <param name="contract">Contract for the instrument for which data is being requested</param>
-        /// <returns>A <see cref="FrozenMarketData"/> object which will receive and store the data sent by IBKR</returns>
+        /// <param name="contract">
+        ///     Contract for the instrument for which data is being requested
+        /// </param>
+        /// <returns>
+        ///     A <see cref="FrozenMarketData"/> object which will receive and store the data
+        ///     sent by IBKR
+        /// </returns>
         /// <remarks>
-        /// IBKR emits each data point as a separate event, and there is no event or other method to indicate that all data has been emitted, so the <see cref="FrozenMarketData"/> object will receive data after it returns from this method. Generally the data is received and processed very quickly, but you will likely need to add a minor wait time before accessing the <see cref="FrozenMarketData"/> object's properties after calling this method.
+        /// IBKR emits each data point as a separate event, and there is no event or other method
+        /// to indicate that all data has been emitted, so the <see cref="FrozenMarketData"/>
+        /// object will receive data after it returns from this method. Generally the data is
+        /// received and processed very quickly, but you will likely need to add a minor wait time
+        /// before accessing the <see cref="FrozenMarketData"/> object's properties after calling
+        /// this method, to allow the data to come in from IBKR.
         /// </remarks>
         public FrozenMarketData RequestFrozenMarketData(Contract contract)
         {
@@ -1326,7 +1337,7 @@ namespace SimpleBroker
                 reqId = _wrapper.ReqId++;
             }
 
-            FrozenMarketData data = new(reqId, contract.ToIBKRContract());
+            FrozenMarketData data = new(reqId, contract);
 
             _wrapper.StringMarketDataEvent += data.UpdateMarketData;
             _wrapper.DecimalMarketDataEvent += data.UpdateMarketData;
