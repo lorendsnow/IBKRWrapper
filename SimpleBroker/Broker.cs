@@ -667,23 +667,26 @@ namespace SimpleBroker
         ///     <para>Get historical bars from IBKR.</para>
         ///     <example><i>Example use: get hourly bars for the last 5 days for AAPL:</i>
         ///         <code>
-        ///             Contract contract = new() { Symbol = "AAPL", SecType = "STK", Exchange = "SMART", Currency = "USD" };
+        ///             Contract contract = new()
+        ///             {
+        ///                 Symbol = "AAPL",
+        ///                 SecType = "STK",
+        ///                 Exchange = "SMART",
+        ///                 Currency = "USD"
+        ///             };
         ///             var bars = await GetHistoricalBars(contract, "5 D", "1 hr", "TRADES");
         ///         </code>
         ///     </example>
         /// </summary>
         /// <param name="contract">the underlying IBKR <see cref="Contract"/></param>
-        /// <param name="durationString">The amount of time to go back from the request's given end date and time</param>
-        /// <param name="barSizeSetting">The data's granularity / bar size</param>
-        /// <param name="whatToShow">The type of data to receive</param>
-        /// <param name="useRTH">Whether to use real time hours only (true) or not (false)</param>
-        /// <param name="formatDate">Format of the date returned by IBKR</param>
-        /// <param name="endDateTime">The request's end date and time (empty string indicates current moment)</param>
-        /// <returns>A list of <see cref="Bar"/> objects.</returns>
-        /// <remarks>
-        ///     <para><b>Parameter Notes:</b></para>
+        /// <param name="durationString">
+        ///     <para>The amount of time to go back from the request's given end date and time</para>
         ///     <list type="table">
-        ///         <listheader><description><u>Valid <paramref name="durationString"/> Options</u>:</description></listheader>
+        ///         <listheader>
+        ///             <description>
+        ///                 <u>Valid <paramref name="durationString"/> Options</u>:
+        ///             </description>
+        ///         </listheader>
         ///         <item>
         ///             <term>S</term><description> Seconds</description>
         ///         </item>
@@ -700,28 +703,55 @@ namespace SimpleBroker
         ///             <term>Y</term><description> Year</description>
         ///         </item>
         ///     </list>
+        /// </param>
+        /// <param name="barSizeSetting">
+        ///     <para>The data's granularity / bar size</para>
         ///     <list type="table">
-        ///         <listheader><description><u>Valid <paramref name="barSizeSetting"/> Options (Bar Unit - Bar Sizes)</u>:</description></listheader>
+        ///         <listheader>
+        ///             <description>
+        ///                 <u>
+        ///                     Valid <paramref name="barSizeSetting"/>
+        ///                     Options (Bar Unit - Bar Sizes)
+        ///                 </u>:
+        ///             </description>
+        ///         </listheader>
         ///         <item>
-        ///             <term>sec</term><description> 1, 5, 10, 15, 30</description>
+        ///             <term>seconds</term>
+        ///             <description>
+        ///                 "1 sec", "5 secs", "10 secs", "15 secs", "30 secs"
+        ///             </description>
         ///         </item>
         ///         <item>
-        ///             <term>min</term><description> 1, 2, 3, 5, 10, 15, 20, 30</description>
+        ///             <term>minuntes</term>
+        ///             <description>
+        ///                 "1 min", "2 mins", "3 mins", "5 mins", "10 mins", "15 mins",
+        ///                 "20 mins", "30 mins"
+        ///             </description>
         ///         </item>
         ///         <item>
-        ///             <term>hr</term><description> 1, 2, 3, 4, 8</description>
+        ///             <term>hours</term>
+        ///             <description>
+        ///                 "1 hr", "2 hrs", "3 hrs", "4 hrs", "8 hrs"
+        ///             </description>
         ///         </item>
         ///         <item>
-        ///             <term>day</term><description> 1</description>
+        ///             <term>days</term><description> "1 day"</description>
         ///         </item>
         ///         <item>
-        ///             <term>week</term><description> 1</description>
+        ///             <term>weeks</term><description> "1 week"</description>
         ///         </item>
         ///         <item>
-        ///             <term>month</term><description> 1</description>
+        ///             <term>months</term><description> "1 month"</description>
         ///         </item>
         ///     </list>
-        ///     <listheader><description><u>Valid <paramref name="whatToShow"/> Options</u>:</description></listheader>
+        /// </param>
+        /// <param name="whatToShow">
+        ///     <para>The type of data to receive</para>
+        ///     <listheader>
+        ///         <description>
+        ///             <u>Valid <paramref name="whatToShow"/> Options</u>:
+        ///         </description>
+        ///     </listheader>
         ///     <list type="bullet">
         ///         <item>
         ///             <description> AGGTRADES (cryptocurrency only)</description>
@@ -739,19 +769,25 @@ namespace SimpleBroker
         ///             <description> FEE_RATE (stocks and ETFs only)</description>
         ///         </item>
         ///         <item>
-        ///             <description> HISTORICAL_VOLATILITY (ETFs, indices and stocks only)</description>
+        ///             <description>
+        ///                  HISTORICAL_VOLATILITY (ETFs, indices and stocks only)
+        ///             </description>
         ///         </item>
         ///         <item>
         ///             <description> MIDPOINT</description>
         ///         </item>
         ///         <item>
-        ///             <description> OPTION_IMPLIED_VOLATILITY (ETFs, indices and stocks only)</description>
+        ///             <description>
+        ///                  OPTION_IMPLIED_VOLATILITY (ETFs, indices and stocks only)
+        ///             </description>
         ///         </item>
         ///         <item>
         ///             <description> SCHEDULE</description>
         ///         </item>
         ///         <item>
-        ///             <description> TRADES (note that trades is adjusted for splits but not dividends)</description>
+        ///             <description>
+        ///                  TRADES (note that trades is adjusted for splits but not dividends)
+        ///             </description>
         ///         </item>
         ///         <item>
         ///             <description> YIELD_ASK (corporate bonds only)</description>
@@ -766,27 +802,19 @@ namespace SimpleBroker
         ///             <description> YIELD_LAST (corporate bonds only)</description>
         ///         </item>
         ///     </list>
-        ///     <list type="table">
-        ///         <listheader><description><u><paramref name="formatDate"/> Options</u>:</description></listheader>
-        ///         <item>
-        ///             <term>1</term><description> String Time Zone Date (e.g., “20231019 16:11:48 America/New_York”)</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>2</term><description> Epoch Date (e.g., 1697746308)</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>3</term><description> Day and Time Date (e.g., “1019 16:11:48 America/New_York”)</description>
-        ///         </item>
-        ///     </list>
-        ///     <para><u><paramref name="endDateTime"/> format</u>: "YYYYMMDD HH:mm:ss". Empty string indicates current present moment.</para>
-        /// </remarks>
+        /// </param>
+        /// <param name="useRTH">Whether to use real time hours only (true) or not (false)</param>
+        /// <param name="endDateTime">
+        ///     The request's end date and time in the form "YYYYMMDD HH:mm:ss {TMZ}". Leaving
+        ///     this parameter as an empty string will refer to the current time.
+        /// </param>
+        /// <returns>A list of <see cref="Bar"/> objects.</returns>
         public Task<List<Bar>> GetHistoricalBars(
             Contract contract,
             string durationString,
             string barSizeSetting,
             string whatToShow,
             bool useRTH = true,
-            int formatDate = 1,
             string endDateTime = ""
         )
         {
@@ -799,7 +827,7 @@ namespace SimpleBroker
                 reqId = _wrapper.ReqId++;
             }
 
-            var handler = Handlers.HistoricalDataHandler(bars, reqId);
+            var handler = Handlers.HistoricalDataHandler(bars, reqId, contract.Symbol);
 
             var endHandler = Handlers.HistoricalDataEndHandler(bars, reqId, tcs);
 
@@ -826,7 +854,7 @@ namespace SimpleBroker
                 barSizeSetting,
                 whatToShow,
                 rth,
-                formatDate,
+                1,
                 false,
                 []
             );
