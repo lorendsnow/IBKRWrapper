@@ -172,7 +172,8 @@ namespace SimpleBroker.EventHandlers
         internal static EventHandler<HistoricalTicksMidEventArgs> HistoricalTicksMidHandler(
             List<HistoricalTick> ticks,
             int reqId,
-            TaskCompletionSource<List<HistoricalTick>> tcs
+            TaskCompletionSource<List<HistoricalTick>> tcs,
+            string symbol
         )
         {
             return (sender, e) =>
@@ -182,7 +183,7 @@ namespace SimpleBroker.EventHandlers
                     return;
                 }
 
-                ticks.AddRange(e.Ticks);
+                ticks.AddRange(e.Ticks.Select(x => x.ToBrokerHistoricalTick(symbol)));
 
                 if (e.Done)
                 {
