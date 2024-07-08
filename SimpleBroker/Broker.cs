@@ -419,7 +419,7 @@ namespace SimpleBroker
         ///         </item>
         ///     </list>
         /// </remarks>
-        public Task<List<Contract>> GetFullyDefinedOptionContractsByDate(
+        public async Task<List<Contract>> GetFullyDefinedOptionContractsByDate(
             string symbol,
             DateTime date,
             string right,
@@ -427,45 +427,13 @@ namespace SimpleBroker
             string currency = "USD"
         )
         {
-            int reqId;
-            lock (_locks.reqIdLock)
-            {
-                reqId = _wrapper.ReqId++;
-            }
-
-            TaskCompletionSource<List<Contract>> tcs = new();
-            List<Contract> contracts = [];
-
-            IBApi.Contract contract =
-                new()
-                {
-                    Symbol = symbol,
-                    SecType = "OPT",
-                    LastTradeDateOrContractMonth = date.ToString("yyyyMMdd"),
-                    Right = right,
-                    Exchange = exchange,
-                    Currency = currency
-                };
-
-            var contractDetailsHandler = Handlers.ContractDetailsHandler(contracts, reqId);
-            var contractDetailsEndHandler = Handlers.ContractDetailsEndHandler(
-                contracts,
-                reqId,
-                tcs
+            return await GetFullyDefinedOptionContractsByDate(
+                symbol,
+                date.ToString("yyyyMMdd"),
+                right,
+                exchange,
+                currency
             );
-
-            _wrapper.ContractDetailsEvent += contractDetailsHandler;
-            _wrapper.ContractDetailsEndEvent += contractDetailsEndHandler;
-
-            tcs.Task.ContinueWith(t =>
-            {
-                _wrapper.ContractDetailsEvent -= contractDetailsHandler;
-                _wrapper.ContractDetailsEndEvent -= contractDetailsEndHandler;
-            });
-
-            _wrapper.ClientSocket.reqContractDetails(reqId, contract);
-
-            return tcs.Task;
         }
 
         /// <summary>
@@ -519,7 +487,7 @@ namespace SimpleBroker
         ///         </item>
         ///     </list>
         /// </remarks>
-        public Task<List<Contract>> GetFullyDefinedOptionContractsByDate(
+        public async Task<List<Contract>> GetFullyDefinedOptionContractsByDate(
             string symbol,
             DateOnly date,
             string right,
@@ -527,45 +495,13 @@ namespace SimpleBroker
             string currency = "USD"
         )
         {
-            int reqId;
-            lock (_locks.reqIdLock)
-            {
-                reqId = _wrapper.ReqId++;
-            }
-
-            TaskCompletionSource<List<Contract>> tcs = new();
-            List<Contract> contracts = [];
-
-            IBApi.Contract contract =
-                new()
-                {
-                    Symbol = symbol,
-                    SecType = "OPT",
-                    LastTradeDateOrContractMonth = date.ToString("yyyyMMdd"),
-                    Right = right,
-                    Exchange = exchange,
-                    Currency = currency
-                };
-
-            var contractDetailsHandler = Handlers.ContractDetailsHandler(contracts, reqId);
-            var contractDetailsEndHandler = Handlers.ContractDetailsEndHandler(
-                contracts,
-                reqId,
-                tcs
+            return await GetFullyDefinedOptionContractsByDate(
+                symbol,
+                date.ToString("yyyyMMdd"),
+                right,
+                exchange,
+                currency
             );
-
-            _wrapper.ContractDetailsEvent += contractDetailsHandler;
-            _wrapper.ContractDetailsEndEvent += contractDetailsEndHandler;
-
-            tcs.Task.ContinueWith(t =>
-            {
-                _wrapper.ContractDetailsEvent -= contractDetailsHandler;
-                _wrapper.ContractDetailsEndEvent -= contractDetailsEndHandler;
-            });
-
-            _wrapper.ClientSocket.reqContractDetails(reqId, contract);
-
-            return tcs.Task;
         }
 
         /// <summary>
@@ -619,7 +555,7 @@ namespace SimpleBroker
         ///         </item>
         ///     </list>
         /// </remarks>
-        public Task<List<Contract>> GetFullyDefinedOptionContractsByDate(
+        public async Task<List<Contract>> GetFullyDefinedOptionContractsByDate(
             string symbol,
             DateTimeOffset date,
             string right,
@@ -627,45 +563,13 @@ namespace SimpleBroker
             string currency = "USD"
         )
         {
-            int reqId;
-            lock (_locks.reqIdLock)
-            {
-                reqId = _wrapper.ReqId++;
-            }
-
-            TaskCompletionSource<List<Contract>> tcs = new();
-            List<Contract> contracts = [];
-
-            IBApi.Contract contract =
-                new()
-                {
-                    Symbol = symbol,
-                    SecType = "OPT",
-                    LastTradeDateOrContractMonth = date.ToString("yyyyMMdd"),
-                    Right = right,
-                    Exchange = exchange,
-                    Currency = currency
-                };
-
-            var contractDetailsHandler = Handlers.ContractDetailsHandler(contracts, reqId);
-            var contractDetailsEndHandler = Handlers.ContractDetailsEndHandler(
-                contracts,
-                reqId,
-                tcs
+            return await GetFullyDefinedOptionContractsByDate(
+                symbol,
+                date.ToString("yyyyMMdd"),
+                right,
+                exchange,
+                currency
             );
-
-            _wrapper.ContractDetailsEvent += contractDetailsHandler;
-            _wrapper.ContractDetailsEndEvent += contractDetailsEndHandler;
-
-            tcs.Task.ContinueWith(t =>
-            {
-                _wrapper.ContractDetailsEvent -= contractDetailsHandler;
-                _wrapper.ContractDetailsEndEvent -= contractDetailsEndHandler;
-            });
-
-            _wrapper.ClientSocket.reqContractDetails(reqId, contract);
-
-            return tcs.Task;
         }
 
         /// <summary>
