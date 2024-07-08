@@ -217,5 +217,21 @@ namespace SimpleBroker
                     : tick.SpecialConditions
             };
         }
+
+        internal static HistoricalTickBidAsk ToBrokerHistoricalTickBidAsk(
+            this IBApi.HistoricalTickBidAsk tick,
+            string symbol
+        )
+        {
+            return new()
+            {
+                Symbol = symbol,
+                Time = IbDateParser.ParseIBDateTime(tick.Time.ToString()),
+                PriceBid = tick.PriceBid,
+                PriceAsk = tick.PriceAsk,
+                SizeBid = tick.SizeBid,
+                SizeAsk = tick.SizeAsk
+            };
+        }
     }
 }
