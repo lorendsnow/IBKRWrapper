@@ -954,24 +954,50 @@ namespace SimpleBroker
 
         /// <summary>
         ///     <para>Get historical bid/ask ticks from IBKR.</para>
-        ///     <example><i>Example use: get 500 ticks, beginning at market open on January 8, 2024:</i>
+        ///     <example>
+        ///         <i>Example use: get 500 ticks, beginning at market open on January 8, 2024:</i>
         ///         <code>
-        ///             Contract contract = new() { Symbol = "AAPL", SecType = "STK", Exchange = "SMART", Currency = "USD" };
-        ///             var bars = await GetHistoricalTicksBidAsk(contract, "20240108 09:30:00", "", 500, true, false);
+        ///             Contract contract = new()
+        ///             {
+        ///                 Symbol = "AAPL",
+        ///                 SecType = "STK",
+        ///                 Exchange = "SMART",
+        ///                 Currency = "USD"
+        ///             };
+        ///             var bars = await GetHistoricalTicksBidAsk(
+        ///                 contract,
+        ///                 "20240108 09:30:00",
+        ///                 "",
+        ///                 500,
+        ///                 true,
+        ///                 false
+        ///             );
         ///         </code>
         ///     </example>
         /// </summary>
         /// <param name="contract">the underlying IBKR <see cref="Contract"/></param>
-        /// <param name="startDateTime">The request's start date and time</param>
-        /// <param name="endDateTime">The request's end date and time</param>
+        /// <param name="startDateTime">
+        ///     The request's start date and time, in the form "YYYYMMDD HH:mm:ss"
+        /// </param>
+        /// <param name="endDateTime">
+        ///     The request's end date and time, in the form "YYYYMMDD HH:mm:ss"
+        /// </param>
         /// <param name="numberOfTicks">Total number of distinct data points (max is 1000)</param>
         /// <param name="useRth">Whether to use real time hours only (true) or not (false)</param>
-        /// <param name="ignoreSize">Whether to ignore the size of the bid/ask (true) or not (false)</param>
+        /// <param name="ignoreSize">
+        ///     Whether to ignore the size of the bid/ask (true) or not (false)
+        /// </param>
         /// <returns>A list of <see cref="HistoricalTickBidAsk"/> objects.</returns>
         /// <remarks>
         ///     <para><b>Parameter Notes:</b></para>
-        ///     <para>Exactly one of <paramref name="startDateTime"/> or <paramref name="endDateTime"/> must be defined in the form "YYYYMMDD HH:mm:ss". Pass an empty string for the other.</para>
-        ///     <para>Note that the max <paramref name="numberOfTicks"/> is 1000 per request.</para>
+        ///     <para>
+        ///         Exactly one of <paramref name="startDateTime"/> or
+        ///         <paramref name="endDateTime"/> must be defined in the form
+        ///         "YYYYMMDD HH:mm:ss". Pass an empty string for the other.
+        ///     </para>
+        ///     <para>
+        ///         Note that the max <paramref name="numberOfTicks"/> is 1000 per request.
+        ///     </para>
         /// </remarks>
         public Task<List<HistoricalTickBidAsk>> GetHistoricalTicksBidAsk(
             Contract contract,
@@ -991,7 +1017,7 @@ namespace SimpleBroker
                 reqId = _wrapper.ReqId++;
             }
 
-            var handler = Handlers.HistoricalTicksBidAskHandler(ticks, reqId, tcs);
+            var handler = Handlers.HistoricalTicksBidAskHandler(ticks, reqId, tcs, contract.Symbol);
 
             _wrapper.HistoricalTicksBidAsk += handler;
 
