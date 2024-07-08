@@ -110,14 +110,15 @@ namespace SimpleBroker.EventHandlers
 
         internal static EventHandler<HistoricalDataEventArgs> HistoricalDataHandler(
             List<Bar> bars,
-            int reqId
+            int reqId,
+            string symbol
         )
         {
             return (sender, e) =>
             {
                 if (e.ReqId == reqId)
                 {
-                    bars.Add(e.Bar);
+                    bars.Add(e.Bar.ToBrokerBar(symbol));
                 }
             };
         }
