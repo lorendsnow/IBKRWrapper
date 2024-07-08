@@ -233,5 +233,19 @@ namespace SimpleBroker
                 SizeAsk = tick.SizeAsk
             };
         }
+
+        internal static HistoricalTick ToBrokerHistoricalTick(
+            this IBApi.HistoricalTick tick,
+            string symbol
+        )
+        {
+            return new()
+            {
+                Symbol = symbol,
+                Time = IbDateParser.ParseIBDateTime(tick.Time.ToString()),
+                Price = tick.Price,
+                Size = tick.Size
+            };
+        }
     }
 }
