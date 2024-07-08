@@ -1,4 +1,6 @@
-﻿namespace SimpleBroker
+﻿using IBKRWrapper.Utils;
+
+namespace SimpleBroker
 {
     internal static class MappingExtensions
     {
@@ -179,6 +181,22 @@
                 Positions = position.Positions,
                 AvgCost = position.AvgCost,
                 Account = position.Account
+            };
+        }
+
+        internal static Bar ToBrokerBar(this IBApi.Bar bar, string symbol)
+        {
+            return new()
+            {
+                Symbol = symbol,
+                Time = IbDateParser.ParseIBDateTime(bar.Time),
+                Open = bar.Open,
+                High = bar.High,
+                Low = bar.Low,
+                Close = bar.Close,
+                Volume = bar.Volume,
+                WAP = bar.WAP,
+                Count = bar.Count
             };
         }
     }
