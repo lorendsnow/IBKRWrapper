@@ -1128,14 +1128,14 @@ namespace SimpleBroker
         }
 
         /// <summary>Get the earliest historical data timestamp for a given contract.</summary>
-        /// <param name="contract">the underlying IBKR <see cref="Contract"/></param>
-        /// <param name="whatToShow">The type of data to receive</param>
-        /// <param name="useRTH">Whether to use real time hours only (true) or not (false)</param>
-        /// <param name="formatDate">Format of the date returned by IBKR</param>
-        /// <returns>A <see cref="DateTimeOffset"/> indicating the timestamp.</returns>
-        /// <remarks>
-        ///     <para><b>Parameter Notes:</b></para>
-        ///     <listheader><description><u>Valid <paramref name="whatToShow"/> Options</u>:</description></listheader>
+        /// <param name="contract">the underlying <see cref="Contract"/></param>
+        /// <param name="whatToShow">
+        ///     <para>The type of data to receive</para>
+        ///     <listheader>
+        ///         <description>
+        ///             <u>Valid <paramref name="whatToShow"/> Options</u>:
+        ///         </description>
+        ///     </listheader>
         ///     <list type="bullet">
         ///         <item>
         ///             <description> AGGTRADES (cryptocurrency only)</description>
@@ -1153,19 +1153,25 @@ namespace SimpleBroker
         ///             <description> FEE_RATE (stocks and ETFs only)</description>
         ///         </item>
         ///         <item>
-        ///             <description> HISTORICAL_VOLATILITY (ETFs, indices and stocks only)</description>
+        ///             <description>
+        ///                  HISTORICAL_VOLATILITY (ETFs, indices and stocks only)
+        ///             </description>
         ///         </item>
         ///         <item>
         ///             <description> MIDPOINT</description>
         ///         </item>
         ///         <item>
-        ///             <description> OPTION_IMPLIED_VOLATILITY (ETFs, indices and stocks only)</description>
+        ///             <description>
+        ///                  OPTION_IMPLIED_VOLATILITY (ETFs, indices and stocks only)
+        ///             </description>
         ///         </item>
         ///         <item>
         ///             <description> SCHEDULE</description>
         ///         </item>
         ///         <item>
-        ///             <description> TRADES (note that trades is adjusted for splits but not dividends)</description>
+        ///             <description>
+        ///                  TRADES (note that trades is adjusted for splits but not dividends)
+        ///             </description>
         ///         </item>
         ///         <item>
         ///             <description> YIELD_ASK (corporate bonds only)</description>
@@ -1180,24 +1186,13 @@ namespace SimpleBroker
         ///             <description> YIELD_LAST (corporate bonds only)</description>
         ///         </item>
         ///     </list>
-        ///     <list type="table">
-        ///         <listheader><description><u><paramref name="formatDate"/> Options</u>:</description></listheader>
-        ///         <item>
-        ///             <term>1</term><description> String Time Zone Date (e.g., “20231019 16:11:48 America/New_York”)</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>2</term><description> Epoch Date (e.g., 1697746308)</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>3</term><description> Day and Time Date (e.g., “1019 16:11:48 America/New_York”)</description>
-        ///         </item>
-        ///     </list>
-        /// </remarks>
+        /// </param>
+        /// <param name="useRTH">Whether to use real time hours only (true) or not (false)</param>
+        /// <returns>A <see cref="DateTimeOffset"/> indicating the timestamp.</returns>
         public Task<DateTimeOffset> GetHeadTimestamp(
             Contract contract,
             string whatToShow,
-            bool useRTH,
-            int formatDate
+            bool useRTH
         )
         {
             int reqId;
@@ -1223,7 +1218,7 @@ namespace SimpleBroker
                 contract.ToIBKRContract(),
                 whatToShow,
                 rth,
-                formatDate
+                1
             );
 
             return tcs.Task;
