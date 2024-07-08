@@ -199,5 +199,23 @@ namespace SimpleBroker
                 Count = bar.Count
             };
         }
+
+        internal static HistoricalTickLast ToBrokerHistoricalTickLast(
+            this IBApi.HistoricalTickLast tick,
+            string symbol
+        )
+        {
+            return new()
+            {
+                Symbol = symbol,
+                Time = IbDateParser.ParseIBDateTime(tick.Time.ToString()),
+                Price = tick.Price,
+                Size = tick.Size,
+                Exchange = tick.Exchange is null ? string.Empty : tick.Exchange,
+                SpecialConditions = tick.SpecialConditions is null
+                    ? string.Empty
+                    : tick.SpecialConditions
+            };
+        }
     }
 }
