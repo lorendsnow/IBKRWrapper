@@ -148,42 +148,6 @@ namespace SimpleBroker
             );
         }
 
-        internal static PortfolioPosition ToBrokerPortfolioPosition(
-            this IBKRWrapper.Models.PortfolioPosition position
-        )
-        {
-            return new()
-            {
-                Ticker = position.Ticker,
-                SecType = position.SecType,
-                Exchange = position.Exchange,
-                PrimaryExch = position.PrimaryExch,
-                Quantity = position.Quantity,
-                MarketPrice = position.MarketPrice,
-                MarketValue = position.MarketValue,
-                AverageCost = position.AverageCost,
-                UnrealizedPNL = position.UnrealizedPNL,
-                RealizedPNL = position.RealizedPNL,
-                AccountName = position.AccountName
-            };
-        }
-
-        internal static Position ToBrokerPosition(this IBKRWrapper.Models.Position position)
-        {
-            return new()
-            {
-                ConId = position.ConId,
-                Symbol = position.Symbol,
-                SecType = position.SecType,
-                Exchange = position.Exchange,
-                Currency = position.Currency,
-                PrimaryExch = position.PrimaryExch,
-                Positions = position.Positions,
-                AvgCost = position.AvgCost,
-                Account = position.Account
-            };
-        }
-
         internal static Bar ToBrokerBar(this IBApi.Bar bar, string symbol)
         {
             return new()
