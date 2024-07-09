@@ -1,6 +1,5 @@
 ﻿using IBApi;
 using IBKRWrapper.Events;
-using IBKRWrapper.Models;
 
 namespace IBKRWrapper
 {
@@ -20,10 +19,10 @@ namespace IBKRWrapper
             int count
         )
         {
-            DateTimeOffset convertedTime = DateTimeOffset.FromUnixTimeSeconds(time);
-            RealTimeBar bar = new(convertedTime, open, high, low, close, volume, WAP, count);
-
-            RealTimeBarEvent?.Invoke(this, new RealTimeBarEventArgs(reqId, bar));
+            RealTimeBarEvent?.Invoke(
+                this,
+                new RealTimeBarEventArgs(reqId, time, open, high, low, close, volume, WAP, count)
+            );
         }
     }
 }
