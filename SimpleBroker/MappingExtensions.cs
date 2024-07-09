@@ -564,5 +564,27 @@ namespace SimpleBroker
                 )
             };
         }
+
+        internal static TickAttribLast ToBrokerTickAttribLast(
+            this IBApi.TickAttribLast tickAttribLast
+        )
+        {
+            return new()
+            {
+                PastLimit = tickAttribLast.PastLimit,
+                Unreported = tickAttribLast.Unreported
+            };
+        }
+
+        internal static TickAttribBidAsk ToBrokerTickAttribBidAsk(
+            this IBApi.TickAttribBidAsk tickAttribLast
+        )
+        {
+            return new()
+            {
+                BidPastLow = tickAttribLast.BidPastLow,
+                AskPastHigh = tickAttribLast.AskPastHigh
+            };
+        }
     }
 }
