@@ -104,9 +104,13 @@ namespace SimpleBroker
         /// Gets a portfolio's positions for a given account.
         /// </summary>
         /// <param name="account">The IBKR account number to get positions for</param>
-        /// <returns>A list of <see cref="PortfolioPosition"/> objects representing the account's positions</returns>
+        /// <returns>
+        ///     A list of <see cref="PortfolioPosition"/> objects representing the account's
+        ///     positions
+        /// </returns>
         /// <remarks>
-        ///     If you have multiple accounts and want all positions across all accounts, use <see cref="GetPositions"/> instead.
+        ///     If you have multiple accounts and want all positions across all accounts, use
+        ///     <see cref="GetPositions"/> instead.
         /// </remarks>
         public Task<List<PortfolioPosition>> GetPortfolioPositions(string account)
         {
@@ -141,7 +145,11 @@ namespace SimpleBroker
         /// </summary>
         /// <returns>A list of <see cref="Position"/> objects</returns>
         /// <remarks>
-        ///     The primary reason to call this method instead of <see cref="GetPortfolioPositions"/> is to get a quick list of positions for all accounts. <see cref="GetPortfolioPositions"/> makes you enter an account number and will return positions only for that account, and also includes PnL information on each position.
+        ///     The primary reason to call this method instead of
+        ///     <see cref="GetPortfolioPositions"/> is to get a quick list of positions for all
+        ///     accounts. <see cref="GetPortfolioPositions"/> makes you enter an account number
+        ///     and will return positions only for that account, and also includes PnL information
+        ///     on each position.
         /// </remarks>
         public Task<List<Position>> GetPositions()
         {
@@ -177,8 +185,12 @@ namespace SimpleBroker
         /// </summary>
         /// <param name="symbol">The instrument's ticker symbol</param>
         /// <param name="securityType">The instrument's security type</param>
-        /// <param name="exchange">Optional parameter to specify an exchange (defaults to SMART)</param>
-        /// <param name="currency">Optional parameter to specify a currency (defaults to USD)</param>
+        /// <param name="exchange">
+        ///     Optional parameter to specify an exchange (defaults to SMART)
+        /// </param>
+        /// <param name="currency">
+        ///     Optional parameter to specify a currency (defaults to USD)
+        /// </param>
         /// <returns>A list of <see cref="Contract"/> objects</returns>
         /// <remarks>
         ///     <list type="table">
@@ -268,7 +280,8 @@ namespace SimpleBroker
         }
 
         /// <summary>
-        /// Gets the fully defined contracts (i.e., with all details included) for an option on a specific date.
+        /// Gets the fully defined contracts (i.e., with all details included) for an option on
+        /// a specific date.
         /// </summary>
         /// <param name="symbol">The underlying's symbol</param>
         /// <param name="date">The option expiration date, in the format "YYYYMMDD"</param>
@@ -369,7 +382,8 @@ namespace SimpleBroker
         }
 
         /// <summary>
-        /// Gets the fully defined contracts (i.e., with all details included) for an option on a specific date.
+        /// Gets the fully defined contracts (i.e., with all details included) for an option on a
+        /// specific date.
         /// </summary>
         /// <param name="symbol">The underlying's symbol</param>
         /// <param name="date">The option expiration date</param>
@@ -437,7 +451,8 @@ namespace SimpleBroker
         }
 
         /// <summary>
-        /// Gets the fully defined contracts (i.e., with all details included) for an option on a specific date.
+        /// Gets the fully defined contracts (i.e., with all details included) for an option on a
+        /// specific date.
         /// </summary>
         /// <param name="symbol">The underlying's symbol</param>
         /// <param name="date">The option expiration date</param>
@@ -505,7 +520,8 @@ namespace SimpleBroker
         }
 
         /// <summary>
-        /// Gets the fully defined contracts (i.e., with all details included) for an option on a specific date.
+        /// Gets the fully defined contracts (i.e., with all details included) for an option on a
+        /// specific date.
         /// </summary>
         /// <param name="symbol">The underlying's symbol</param>
         /// <param name="date">The option expiration date</param>
@@ -573,13 +589,17 @@ namespace SimpleBroker
         }
 
         /// <summary>
-        /// Gets the option chain (i.e., all available expirations and strikes) for a given security.
+        /// Gets the option chain (i.e., all available expirations and strikes) for a given
+        /// security.
         /// </summary>
         /// <param name="symbol">The security's ticker symbol</param>
         /// <param name="securityType">The underlying security's type</param>
         /// <param name="exchange">The underlying security's exchange</param>
         /// <param name="currency">The underlying security's currency</param>
-        /// <returns>An <see cref="OptionsChain"/> object which will receive the strikes and expirations from IBKR and save them in a hashset</returns>
+        /// <returns>
+        ///     An <see cref="OptionsChain"/> object which will receive the strikes and expirations
+        ///     from IBKR and save them in a hashset
+        /// </returns>
         /// <remarks>
         ///     <list type="table">
         ///         <listheader><description>Security Type Definitions:</description></listheader>
@@ -680,7 +700,9 @@ namespace SimpleBroker
         /// </summary>
         /// <param name="contract">the underlying IBKR <see cref="Contract"/></param>
         /// <param name="durationString">
-        ///     <para>The amount of time to go back from the request's given end date and time</para>
+        ///     <para>
+        ///         The amount of time to go back from the request's given end date and time
+        ///     </para>
         ///     <list type="table">
         ///         <listheader>
         ///             <description>
@@ -1232,18 +1254,32 @@ namespace SimpleBroker
         /// Subscribe to real-time market data for a given contract.
         /// </summary>
         /// <param name="contract">The underlying contract</param>
-        /// <param name="whatToShow">Type of data to retrieve. Available values include "TRADES", "MIDPOINT", "BID" and "ASK"</param>
+        /// <param name="whatToShow">
+        ///     Type of data to retrieve. Available values include "TRADES", "MIDPOINT", "BID"
+        ///     and "ASK"
+        /// </param>
         /// <param name="useRTH">Whether to use only real-time data or not</param>
-        /// <returns>A <see cref="RealTimeBarList"/> object, which receives and stores real-time bars from IBKR, and includes an event to emit bars upon receipt</returns>
+        /// <returns>
+        ///     A <see cref="RealTimeBarList"/> object, which receives and stores real-time bars
+        ///     from IBKR, and includes an event to emit bars upon receipt
+        /// </returns>
         /// <remarks>
         ///     <para><u>Notes from IBKR</u>:</para>
-        ///     <para>Only 5 seconds bars are provided. This request is subject to the same pacing as any historical data request: no more than 60 API queries in more than 600 seconds.</para>
-        ///     <para>Real time bars subscriptions are also included in the calculation of the number of Level 1 market data subscriptions allowed in an account.</para>
+        ///     <para>
+        ///         Only 5 seconds bars are provided. This request is subject to the same pacing
+        ///         as any historical data request: no more than 60 API queries in more than 600
+        ///         seconds.
+        ///     </para>
+        ///     <para>
+        ///         Real time bars subscriptions are also included in the calculation of the
+        ///         number of Level 1 market data subscriptions allowed in an account.
+        ///     </para>
         /// </remarks>
         public RealTimeBarList GetRealTimeBars(Contract contract, string whatToShow, bool useRTH)
         {
-            // The barSize parameter in IBKR's reqRealTimeBars method is currently ignored and bar size is fixed at 5 seconds, so we just pass 5 to the method.
-            const int BARSIZE = 5;
+            const int BARSIZE = 5; // The barSize parameter in IBKR's reqRealTimeBars method is
+            // currently ignored and bar size is fixed at 5 seconds, so we just pass 5 to the
+            // method.
 
             int reqId;
             lock (_locks.reqIdLock)
@@ -1251,8 +1287,7 @@ namespace SimpleBroker
                 reqId = _wrapper.ReqId++;
             }
 
-            RealTimeBarList rtBars =
-                new(reqId, contract.ToIBKRContract(), BARSIZE, whatToShow, useRTH);
+            RealTimeBarList rtBars = new(reqId, contract, BARSIZE, whatToShow, useRTH);
 
             _wrapper.RealTimeBarEvent += rtBars.HandleNewBar;
 
@@ -1271,8 +1306,13 @@ namespace SimpleBroker
         /// <summary>
         /// Request real-time watchlist market data for a contract.
         /// </summary>
-        /// <param name="contract"><see cref="Contract"/> for the instrument for which data is being requested</param>
-        /// <returns>A <see cref="LiveMarketData"/> object which receives and stores data emitted by IBKR</returns>
+        /// <param name="contract">
+        ///     <see cref="Contract"/> for the instrument for which data is being requested
+        /// </param>
+        /// <returns>
+        ///     A <see cref="LiveMarketData"/> object which receives and stores data emitted by
+        ///     IBKR
+        /// </returns>
         public LiveMarketData RequestMarketData(Contract contract)
         {
             if (_wrapper.LastMarketDataTypeRequested != MarketDataType.Live)
@@ -1357,7 +1397,8 @@ namespace SimpleBroker
         }
 
         /// <summary>
-        /// Calculates an option's implied volatility based on its price and the price of the underlying.
+        /// Calculates an option's implied volatility based on its price and the price of the
+        /// underlying.
         /// </summary>
         /// <param name="contract">An option contract</param>
         /// <param name="optionPrice">The hypothetical option price</param>
@@ -1405,37 +1446,48 @@ namespace SimpleBroker
         }
 
         /// <summary>
-        /// Gets tick by tick data for a contract.
+        /// Subscribes to real-time last trade tick by tick data for a contract.
         /// </summary>
         /// <param name="contract">The underlying contract</param>
-        /// <param name="tickType">The type of data requested. Valid inputs include "Last", "AllLast", "BidAsk" or "Midpoint"</param>
-        /// <returns>A <see cref="TickDataList"/> object, which receives and stores the tick data sent by IBKR</returns>
+        /// <returns>
+        ///     A <see cref="TickLastDataList"/> object, which receives and stores the tick data
+        ///     sent by IBKR
+        /// </returns>
         /// <remarks>
         ///     <para><u>Notes from IBKR</u>:</para>
-        ///     <para>The maximum number of simultaneous tick-by-tick subscriptions allowed for a user is determined by the same formula used to calculate maximum number of market depth subscriptions Limitations. For some securities, getting tick-by-tick data requires Level 2 data bundles.</para>
+        ///     <para>
+        ///         The maximum number of simultaneous tick-by-tick subscriptions allowed for a
+        ///         user is determined by the same formula used to calculate maximum number of
+        ///         market depth subscriptions Limitations. For some securities, getting
+        ///         tick-by-tick data requires Level 2 data bundles.
+        ///     </para>
         ///     <list type="bullet">
         ///         <item>
-        ///             Real time tick-by-tick data is currently not available for options. Historical tick-by-tick data is                    available.
-        ///         </item>
-        ///         <item>The tick type field is case sensitive. It must be BidAsk, Last, AllLast, MidPoint. AllLast has additional trade types such as combos, derivatives, and average price trades which are not included in Last.</item>
-        ///         <item>
-        ///             Tick-by-tick data for options is currently only available historically and not in real time.
+        ///             Real time tick-by-tick data is currently not available for options.
+        ///             Historical tick-by-tick data is available.
         ///         </item>
         ///         <item>
-        ///             Tick-by-tick data for indices is only provided for indices which are on CME.
+        ///             Tick-by-tick data for options is currently only available historically
+        ///             and not in real time.
+        ///         </item>
+        ///         <item>
+        ///             Tick-by-tick data for indices is only provided for indices which are on
+        ///             CME.
         ///         </item>
         ///         <item>
         ///             Tick-by-tick data is not available for combos.
         ///         </item>
         ///         <item>
-        ///             No more than 1 tick-by-tick request can be made for the same instrument within 15 seconds.
+        ///             No more than 1 tick-by-tick request can be made for the same instrument
+        ///             within 15 seconds.
         ///         </item>
         ///         <item>
-        ///             Time and Sales data requires a Level 1, Top Of Book market data subscription.
+        ///             Time and Sales data requires a Level 1, Top Of Book market data
+        ///             subscription.
         ///         </item>
         ///     </list>
         /// </remarks>
-        public TickDataList GetTickByTickData(Contract contract, string tickType)
+        public TickLastDataList GetLastTickByTickData(Contract contract)
         {
             int reqId;
             lock (_locks.reqIdLock)
@@ -1443,14 +1495,162 @@ namespace SimpleBroker
                 reqId = _wrapper.ReqId++;
             }
 
-            TickDataList tickDataList = new(reqId, contract.ToIBKRContract(), tickType);
+            TickLastDataList tickDataList =
+                new()
+                {
+                    ReqId = reqId,
+                    Contract = contract,
+                    Data = []
+                };
 
-            _wrapper.TickByTickEvent += tickDataList.HandleNewTick;
+            _wrapper.TickLastEvent += tickDataList.HandleTickData;
 
             _wrapper.ClientSocket.reqTickByTickData(
                 reqId,
                 contract.ToIBKRContract(),
-                tickType,
+                "AllLast",
+                0,
+                false
+            );
+
+            return tickDataList;
+        }
+
+        /// <summary>
+        /// Subscribes to real-time bid/ask tick by tick data for a contract.
+        /// </summary>
+        /// <param name="contract">The underlying contract</param>
+        /// <returns>
+        ///     A <see cref="TickBidAskDataList"/> object, which receives and stores the tick data
+        ///     sent by IBKR
+        /// </returns>
+        /// <remarks>
+        ///     <para><u>Notes from IBKR</u>:</para>
+        ///     <para>
+        ///         The maximum number of simultaneous tick-by-tick subscriptions allowed for a
+        ///         user is determined by the same formula used to calculate maximum number of
+        ///         market depth subscriptions Limitations. For some securities, getting
+        ///         tick-by-tick data requires Level 2 data bundles.
+        ///     </para>
+        ///     <list type="bullet">
+        ///         <item>
+        ///             Real time tick-by-tick data is currently not available for options.
+        ///             Historical tick-by-tick data is available.
+        ///         </item>
+        ///         <item>
+        ///             Tick-by-tick data for options is currently only available historically and
+        ///             not in real time.
+        ///         </item>
+        ///         <item>
+        ///             Tick-by-tick data for indices is only provided for indices which are on
+        ///             CME.
+        ///         </item>
+        ///         <item>
+        ///             Tick-by-tick data is not available for combos.
+        ///         </item>
+        ///         <item>
+        ///             No more than 1 tick-by-tick request can be made for the same instrument
+        ///             within 15 seconds.
+        ///         </item>
+        ///         <item>
+        ///             Time and Sales data requires a Level 1, Top Of Book market data
+        ///             subscription.
+        ///         </item>
+        ///     </list>
+        /// </remarks>
+        public TickBidAskDataList GetBidAskTickByTickData(Contract contract)
+        {
+            int reqId;
+            lock (_locks.reqIdLock)
+            {
+                reqId = _wrapper.ReqId++;
+            }
+
+            TickBidAskDataList tickDataList =
+                new()
+                {
+                    ReqId = reqId,
+                    Contract = contract,
+                    Data = []
+                };
+
+            _wrapper.TickBidAskEvent += tickDataList.HandleTickData;
+
+            _wrapper.ClientSocket.reqTickByTickData(
+                reqId,
+                contract.ToIBKRContract(),
+                "BidAsk",
+                0,
+                false
+            );
+
+            return tickDataList;
+        }
+
+        /// <summary>
+        /// Subscribes to real-time midpoint tick by tick data for a contract.
+        /// </summary>
+        /// <param name="contract">The underlying contract</param>
+        /// <returns>
+        ///     A <see cref="TickMidDataList"/> object, which receives and stores the tick data
+        ///     sent by IBKR
+        /// </returns>
+        /// <remarks>
+        ///     <para><u>Notes from IBKR</u>:</para>
+        ///     <para>
+        ///         The maximum number of simultaneous tick-by-tick subscriptions allowed for a
+        ///         user is determined by the same formula used to calculate maximum number of
+        ///         market depth subscriptions Limitations. For some securities, getting
+        ///         tick-by-tick data requires Level 2 data bundles.
+        ///     </para>
+        ///     <list type="bullet">
+        ///         <item>
+        ///             Real time tick-by-tick data is currently not available for options.
+        ///             Historical tick-by-tick data is available.
+        ///         </item>
+        ///         <item>
+        ///             Tick-by-tick data for options is currently only available historically and
+        ///             not in real time.
+        ///         </item>
+        ///         <item>
+        ///             Tick-by-tick data for indices is only provided for indices which are on
+        ///             CME.
+        ///         </item>
+        ///         <item>
+        ///             Tick-by-tick data is not available for combos.
+        ///         </item>
+        ///         <item>
+        ///             No more than 1 tick-by-tick request can be made for the same instrument
+        ///             within 15 seconds.
+        ///         </item>
+        ///         <item>
+        ///             Time and Sales data requires a Level 1, Top Of Book market data
+        ///             subscription.
+        ///         </item>
+        ///     </list>
+        /// </remarks>
+        public TickMidDataList GetMidTickByTickData(Contract contract)
+        {
+            int reqId;
+            lock (_locks.reqIdLock)
+            {
+                reqId = _wrapper.ReqId++;
+            }
+
+            TickMidDataList tickDataList =
+                new()
+                {
+                    ReqId = reqId,
+                    Contract = contract,
+                    Data = []
+                };
+
+            _wrapper.TickMidEvent += tickDataList.HandleTickData;
+
+            _wrapper.ClientSocket.reqTickByTickData(
+                reqId,
+                contract.ToIBKRContract(),
+                "MidPoint",
                 0,
                 false
             );
