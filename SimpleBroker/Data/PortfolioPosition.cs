@@ -57,12 +57,12 @@
         public required string SecType { get; init; }
 
         /// <summary>
-        /// The destination exchange on the underlying IBKR <see cref="IBApi.Contract"/>
+        /// The destination exchange on the underlying contract
         /// </summary>
         public required string Exchange { get; init; }
 
         /// <summary>
-        /// The primary exchange on the underlying IBKR <see cref="IBApi.Contract"/>
+        /// The primary exchange on the underlying contract
         /// </summary>
         public required string PrimaryExch { get; init; }
 
@@ -97,8 +97,8 @@
         public double RealizedPNL { get; init; }
 
         /// <summary>
-        /// The account name associated with the position.
+        /// The account associated with the position.
         /// </summary>
-        public required string AccountName { get; init; }
+        public required string Account { get; init; }
     }
 }
