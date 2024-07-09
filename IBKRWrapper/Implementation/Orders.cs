@@ -1,6 +1,5 @@
 ﻿using IBApi;
 using IBKRWrapper.Events;
-using IBKRWrapper.Models;
 
 namespace IBKRWrapper
 {
@@ -25,17 +24,17 @@ namespace IBKRWrapper
             OrderStatusEvent?.Invoke(
                 this,
                 new OrderStatusEventArgs(
-                    new OrderStatus(
-                        orderId,
-                        status,
-                        filled,
-                        remaining,
-                        avgFillPrice,
-                        permId,
-                        parentId,
-                        lastFillPrice,
-                        whyHeld
-                    )
+                    orderId,
+                    status,
+                    filled,
+                    remaining,
+                    avgFillPrice,
+                    permId,
+                    parentId,
+                    lastFillPrice,
+                    clientId,
+                    whyHeld,
+                    mktCapPrice
                 )
             );
         }
