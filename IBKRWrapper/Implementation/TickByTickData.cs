@@ -1,12 +1,13 @@
 ﻿using IBApi;
 using IBKRWrapper.Events;
-using IBKRWrapper.Models;
 
 namespace IBKRWrapper
 {
     public partial class Wrapper : EWrapper
     {
-        public event EventHandler<TickByTickEventArgs>? TickByTickEvent;
+        public event EventHandler<TickLastEventArgs>? TickLastEvent;
+        public event EventHandler<TickBidAskEventArgs>? TickBidAskEvent;
+        public event EventHandler<TickMidEventArgs>? TickMidEvent;
 
         public void tickByTickAllLast(
             int reqId,
@@ -19,16 +20,19 @@ namespace IBKRWrapper
             string specialConditions
         )
         {
-            TickData tickData =
-                new()
-                {
-                    Time = DateTimeOffset.FromUnixTimeSeconds(time),
-                    Last = price,
-                    LastSize = size,
-                    Exchange = exchange,
-                    SpecialConditions = specialConditions
-                };
-            TickByTickEvent?.Invoke(this, new TickByTickEventArgs(reqId, tickData));
+            TickLastEvent?.Invoke(
+                this,
+                new TickLastEventArgs(
+                    reqId,
+                    tickType,
+                    time,
+                    price,
+                    size,
+                    tickAttribLast,
+                    exchange,
+                    specialConditions
+                )
+            );
         }
 
         public void tickByTickBidAsk(
@@ -41,25 +45,23 @@ namespace IBKRWrapper
             TickAttribBidAsk tickAttribBidAsk
         )
         {
-            TickData tickData =
-                new()
-                {
-                    Time = DateTimeOffset.FromUnixTimeSeconds(time),
-                    Bid = bidPrice,
-                    Ask = askPrice,
-                    BidSize = bidSize,
-                    AskSize = askSize
-                };
-
-            TickByTickEvent?.Invoke(this, new TickByTickEventArgs(reqId, tickData));
+            TickBidAskEvent?.Invoke(
+                this,
+                new TickBidAskEventArgs(
+                    reqId,
+                    time,
+                    bidPrice,
+                    askPrice,
+                    bidSize,
+                    askSize,
+                    tickAttribBidAsk
+                )
+            );
         }
 
         public void tickByTickMidPoint(int reqId, long time, double midPoint)
         {
-            TickData tickData =
-                new() { Time = DateTimeOffset.FromUnixTimeSeconds(time), Mid = midPoint };
-
-            TickByTickEvent?.Invoke(this, new TickByTickEventArgs(reqId, tickData));
+            TickMidEvent?.Invoke(this, new TickMidEventArgs(reqId, time, midPoint));
         }
     }
 }
