@@ -1465,10 +1465,13 @@ namespace SimpleBroker
         /// <summary>
         /// Place an order with IBKR.
         /// </summary>
-        /// <param name="contract">A <see cref="Contract"/> for the instrument</param>
-        /// <param name="order">An <see cref="Order"/> object</param>
-        /// <returns>A <see cref="Trade"/> object, which receives and holds information on the order status and fills</returns>
-        public Task<Trade> PlaceOrder(Contract contract, Order order)
+        /// <param name="contract">A contract for the instrument</param>
+        /// <param name="order">An order object</param>
+        /// <returns>
+        ///     A <see cref="Trade"/> object, which receives and holds information on the order
+        ///     status and fills
+        /// </returns>
+        public Task<Trade> PlaceOrder(Contract contract, OrderBase order)
         {
             TaskCompletionSource<Trade> tcs = new();
             int orderId;
@@ -1476,22 +1479,38 @@ namespace SimpleBroker
             lock (_locks.orderIdLock)
             {
                 orderId = _wrapper.NextOrderId++;
+                if (orderId == 0)
+                {
+                    orderId = _wrapper.NextOrderId++;
+                }
             }
 
-            Trade trade = Trade.New(orderId, contract.ToIBKRContract(), order, null);
+            Console.WriteLine($"Order ID: {orderId}");
+
+            Trade trade = Trade.New(orderId, contract, order);
 
             // The trade subscribes to the order status, execution, and commission events for updates.
             _wrapper.OrderStatusEvent += trade.HandleOrderStatus;
             _wrapper.ExecDetailsEvent += trade.HandleExecution;
             _wrapper.CommissionEvent += trade.HandleCommission;
 
+            var errorhandler = Handlers.ErrorHandler(orderId, tcs);
             var statusUpdate = Handlers.OrderStatusHandler(orderId, tcs, trade);
 
             _wrapper.OrderStatusEvent += statusUpdate;
+            _wrapper.ErrorEvent += errorhandler;
 
-            tcs.Task.ContinueWith(t => _wrapper.OrderStatusEvent -= statusUpdate);
+            tcs.Task.ContinueWith(t =>
+            {
+                _wrapper.OrderStatusEvent -= statusUpdate;
+                _wrapper.ErrorEvent -= errorhandler;
+            });
 
-            _wrapper.ClientSocket.placeOrder(orderId, contract.ToIBKRContract(), order);
+            _wrapper.ClientSocket.placeOrder(
+                orderId,
+                contract.ToIBKRContract(),
+                order.ToIBKROrder()
+            );
 
             return tcs.Task;
         }
@@ -1624,7 +1643,7 @@ namespace SimpleBroker
             string instrument,
             string location,
             string scanCode,
-            Dictionary<string, string>? filterOptions
+            List<TagValue>? filterOptions
         )
         {
             int reqId;
@@ -1638,8 +1657,9 @@ namespace SimpleBroker
                 location,
                 scanCode
             );
-            List<TagValue> tagValues =
-                filterOptions != null ? Wrapper.MakeFilterOptions(filterOptions) : [];
+
+            List<IBApi.TagValue> tagValues =
+                filterOptions?.Select(x => x.ToIBKRTagValue()).ToList() ?? [];
 
             ScannerData scannerData = new(reqId, scannerSub, tagValues);
             _wrapper.ScannerDataEvent += scannerData.HandleScannerData;
