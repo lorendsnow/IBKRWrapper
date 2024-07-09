@@ -203,7 +203,9 @@ namespace SimpleBroker.EventHandlers
         internal static EventHandler<OpenOrderEventArgs> OpenOrderHandler(List<Trade> trades)
         {
             return (sender, e) =>
-                trades.Add(Trade.New(e.OrderId, e.Contract, e.Order, e.OrderState.Status));
+                trades.Add(
+                    Trade.New(e.OrderId, e.Contract.ToBrokerContract(), e.Order.ToBrokerOrder())
+                );
         }
 
         internal static EventHandler OpenOrderEndHandler(
@@ -237,11 +239,11 @@ namespace SimpleBroker.EventHandlers
         {
             return (sender, e) =>
             {
-                if (e.OrderStatus.OrderId == orderId && e.OrderStatus.Accepted)
+                if (e.OrderId == orderId && e.Accepted)
                 {
                     tcs.SetResult(trade);
                 }
-                else if (e.OrderStatus.OrderId == orderId && e.OrderStatus.Canceled)
+                else if (e.OrderId == orderId && e.Canceled)
                 {
                     tcs.SetCanceled();
                 }
