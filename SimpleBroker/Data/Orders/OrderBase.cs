@@ -1,6 +1,4 @@
-﻿using IBApi;
-
-namespace SimpleBroker
+﻿namespace SimpleBroker
 {
     /// <summary>
     /// Base order object; mirrors IBKR's Order object
@@ -70,23 +68,6 @@ namespace SimpleBroker
         /// Generic field to contain the stop price for <b>STP LMT</b> orders, trailing amount, etc.
         /// </summary>
         public double AuxPrice { get; set; }
-
-        /**
-         * @brief The time in force.\n
-         * Valid values are: \n
-         *      <b>DAY</b> - Valid for the day only.\n
-         *      <b>GTC</b> - Good until canceled. The order will continue to work within the system and in the marketplace until it executes or is canceled. GTC orders will be automatically be cancelled under the following conditions: \n
-         *          \t\t If a corporate action on a security results in a stock split (forward or reverse), exchange for shares, or distribution of shares.
-         *          \t\t If you do not log into your IB account for 90 days. \n
-         *          \t\t At the end of the calendar quarter following the current quarter. For example, an order placed during the third quarter of 2011 will be canceled at the end of the first quarter of 2012. If the last day is a non-trading day, the cancellation will occur at the close of the final trading day of that quarter. For example, if the last day of the quarter is Sunday, the orders will be cancelled on the preceding Friday.\n
-         *          \t\t Orders that are modified will be assigned a new “Auto Expire” date consistent with the end of the calendar quarter following the current quarter.\n
-         *          \t\t Orders submitted to IB that remain in force for more than one day will not be reduced for dividends. To allow adjustment to your order price on ex-dividend date, consider using a Good-Til-Date/Time (GTD) or Good-after-Time/Date (GAT) order type, or a combination of the two.\n
-         *      <b>IOC</b> - Immediate or Cancel. Any portion that is not filled as soon as it becomes available in the market is canceled.\n
-         *      <b>GTD</b> - Good until Date. It will remain working within the system and in the marketplace until it executes or until the close of the market on the date specified\n
-         *      <b>OPG</b> - Use OPG to send a market-on-open (MOO) or limit-on-open (LOO) order.\n
-         *      <b>FOK</b> - If the entire Fill-or-Kill order does not execute as soon as it becomes available, the entire order is canceled.\n
-         *      <b>DTC</b> - Day until Canceled.
-         */
 
         /// <summary>
         /// <para>Time in force</para>
@@ -451,13 +432,6 @@ namespace SimpleBroker
         /// </summary>
         public string OpenClose { get; set; }
 
-        /**
-         * @brief The order's origin. Same as TWS "Origin" column. Identifies the type of customer from which the order originated. \n
-         * Valid values are: \n
-         * <b>0</b> - Customer \n
-         * <b>1</b> - Firm
-         */
-
         /// <summary>
         /// The order's origin. Same as TWS "Origin" column. Identifies the type of customer from
         /// which the order originated.
@@ -721,17 +695,6 @@ namespace SimpleBroker
         /// <para>Valid values are IB, Away, and PTA (post trade allocation)</para>
         /// </summary>
         public string? ClearingIntent { get; set; }
-
-        /**
-         * @brief The algorithm strategy.\n
-         * As of API verion 9.6, the following algorithms are supported:\n
-         *      <b>ArrivalPx</b> - Arrival Price \n
-         *      <b>DarkIce</b> - Dark Ice \n
-         *      <b>PctVol</b> - Percentage of Volume \n
-         *      <b>Twap</b> - TWAP (Time Weighted Average Price) \n
-         *      <b>Vwap</b> - VWAP (Volume Weighted Average Price) \n
-         * <b>For more information about IB's API algorithms, refer to https://interactivebrokers.github.io/tws-api/ibalgos.html</b>
-         */
 
         /// <summary>
         /// The algorithm strategy.
@@ -1012,26 +975,6 @@ namespace SimpleBroker
         public double MidOffsetAtHalf { get; set; }
 
         /// <summary>
-        /// Customer account
-        /// </summary>
-        public string CustomerAccount { get; set; }
-
-        /// <summary>
-        /// Professional customer
-        /// </summary>
-        public bool ProfessionalCustomer { get; set; }
-
-        /// <summary>
-        /// Bond accrued interest
-        /// </summary>
-        public string BondAccruedInterest { get; set; }
-
-        /// <summary>
-        /// External User Id
-        /// </summary>
-        public string ExternalUserId { get; set; }
-
-        /// <summary>
         /// Manual Order Indicator
         /// </summary>
         public int ManualOrderIndicator { get; set; }
@@ -1039,7 +982,15 @@ namespace SimpleBroker
         /// <summary>
         /// Constructor which defaults certain fields to their maximum values or empty strings.
         /// </summary>
-        public OrderBase()
+        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+        public OrderBase(
+            string action,
+            string tif,
+            string account,
+            decimal quantity,
+            bool outsideRth,
+            string orderType
+        )
         {
             LmtPrice = double.MaxValue;
             AuxPrice = double.MaxValue;
@@ -1089,14 +1040,12 @@ namespace SimpleBroker
             ScaleTable = EMPTY_STR;
             WhatIf = false;
             NotHeld = false;
-            Conditions = [];
             TriggerPrice = double.MaxValue;
             LmtPriceOffset = double.MaxValue;
             AdjustedStopPrice = double.MaxValue;
             AdjustedStopLimitPrice = double.MaxValue;
             AdjustedTrailingAmount = double.MaxValue;
             ExtOperator = EMPTY_STR;
-            Tier = new SoftDollarTier(EMPTY_STR, EMPTY_STR, EMPTY_STR);
             CashQty = double.MaxValue;
             Mifid2DecisionMaker = EMPTY_STR;
             Mifid2DecisionAlgo = EMPTY_STR;
@@ -1121,10 +1070,95 @@ namespace SimpleBroker
             CompeteAgainstBestOffset = double.MaxValue;
             MidOffsetAtWhole = double.MaxValue;
             MidOffsetAtHalf = double.MaxValue;
-            CustomerAccount = EMPTY_STR;
-            ProfessionalCustomer = false;
-            BondAccruedInterest = EMPTY_STR;
-            ExternalUserId = EMPTY_STR;
+            ManualOrderIndicator = int.MaxValue;
+            Action = action;
+            Tif = tif;
+            Account = account;
+            TotalQuantity = quantity;
+            OutsideRth = outsideRth;
+            OrderType = orderType;
+        }
+
+        internal OrderBase()
+        {
+            LmtPrice = double.MaxValue;
+            AuxPrice = double.MaxValue;
+            ActiveStartTime = EMPTY_STR;
+            ActiveStopTime = EMPTY_STR;
+            OutsideRth = false;
+            OpenClose = EMPTY_STR;
+            Origin = CUSTOMER;
+            Transmit = true;
+            DesignatedLocation = EMPTY_STR;
+            ExemptCode = -1;
+            MinQty = int.MaxValue;
+            PercentOffset = double.MaxValue;
+            OptOutSmartRouting = false;
+            StartingPrice = double.MaxValue;
+            StockRefPrice = double.MaxValue;
+            Delta = double.MaxValue;
+            StockRangeLower = double.MaxValue;
+            StockRangeUpper = double.MaxValue;
+            Volatility = double.MaxValue;
+            VolatilityType = int.MaxValue;
+            DeltaNeutralOrderType = EMPTY_STR;
+            DeltaNeutralAuxPrice = double.MaxValue;
+            DeltaNeutralConId = 0;
+            DeltaNeutralSettlingFirm = EMPTY_STR;
+            DeltaNeutralClearingAccount = EMPTY_STR;
+            DeltaNeutralClearingIntent = EMPTY_STR;
+            DeltaNeutralOpenClose = EMPTY_STR;
+            DeltaNeutralShortSale = false;
+            DeltaNeutralShortSaleSlot = 0;
+            DeltaNeutralDesignatedLocation = EMPTY_STR;
+            ReferencePriceType = int.MaxValue;
+            TrailStopPrice = double.MaxValue;
+            TrailingPercent = double.MaxValue;
+            BasisPoints = double.MaxValue;
+            BasisPointsType = int.MaxValue;
+            ScaleInitLevelSize = int.MaxValue;
+            ScaleSubsLevelSize = int.MaxValue;
+            ScalePriceIncrement = double.MaxValue;
+            ScalePriceAdjustValue = double.MaxValue;
+            ScalePriceAdjustInterval = int.MaxValue;
+            ScaleProfitOffset = double.MaxValue;
+            ScaleAutoReset = false;
+            ScaleInitPosition = int.MaxValue;
+            ScaleInitFillQty = int.MaxValue;
+            ScaleRandomPercent = false;
+            ScaleTable = EMPTY_STR;
+            WhatIf = false;
+            NotHeld = false;
+            TriggerPrice = double.MaxValue;
+            LmtPriceOffset = double.MaxValue;
+            AdjustedStopPrice = double.MaxValue;
+            AdjustedStopLimitPrice = double.MaxValue;
+            AdjustedTrailingAmount = double.MaxValue;
+            ExtOperator = EMPTY_STR;
+            CashQty = double.MaxValue;
+            Mifid2DecisionMaker = EMPTY_STR;
+            Mifid2DecisionAlgo = EMPTY_STR;
+            Mifid2ExecutionTrader = EMPTY_STR;
+            Mifid2ExecutionAlgo = EMPTY_STR;
+            DontUseAutoPriceForHedge = false;
+            AutoCancelDate = EMPTY_STR;
+            FilledQuantity = decimal.MaxValue;
+            RefFuturesConId = int.MaxValue;
+            AutoCancelParent = false;
+            Shareholder = EMPTY_STR;
+            ImbalanceOnly = false;
+            RouteMarketableToBbo = false;
+            ParentPermId = long.MaxValue;
+            UsePriceMgmtAlgo = null;
+            Duration = int.MaxValue;
+            PostToAts = int.MaxValue;
+            AdvancedErrorOverride = EMPTY_STR;
+            ManualOrderTime = EMPTY_STR;
+            MinTradeQty = int.MaxValue;
+            MinCompeteSize = int.MaxValue;
+            CompeteAgainstBestOffset = double.MaxValue;
+            MidOffsetAtWhole = double.MaxValue;
+            MidOffsetAtHalf = double.MaxValue;
             ManualOrderIndicator = int.MaxValue;
         }
 
@@ -1207,11 +1241,6 @@ namespace SimpleBroker
         public int AdjustableTrailingUnit { get; set; }
 
         /// <summary>
-        /// Conditions determining when the order will be activated or canceled
-        /// </summary>
-        public List<OrderCondition> Conditions { get; set; }
-
-        /// <summary>
         /// Indicates whether or not conditions will also be valid outside Regular Trading Hours
         /// </summary>
         public bool ConditionsIgnoreRth { get; set; }
@@ -1220,12 +1249,6 @@ namespace SimpleBroker
         /// Conditions can determine if an order should become active or canceled.
         /// </summary>
         public bool ConditionsCancelOrder { get; set; }
-
-        /// <summary>
-        /// Define the Soft Dollar Tier used for the order. Only provided for registered
-        /// professional advisors and hedge and mutual funds.
-        /// </summary>
-        public SoftDollarTier Tier { get; set; }
 
         /// <summary>
         /// Set to true to create tickets from API orders when TWS is used as an OMS
