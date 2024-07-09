@@ -1,6 +1,5 @@
 ﻿using IBApi;
 using IBKRWrapper.Events;
-using IBKRWrapper.Models;
 
 namespace IBKRWrapper
 {
@@ -22,16 +21,14 @@ namespace IBKRWrapper
             UpdatePortfolioEvent?.Invoke(
                 this,
                 new UpdatePortfolioEventArgs(
-                    new PortfolioPosition(
-                        contract,
-                        position,
-                        marketPrice,
-                        marketValue,
-                        averageCost,
-                        unrealizedPNL,
-                        realizedPNL,
-                        accountName
-                    )
+                    contract,
+                    position,
+                    marketPrice,
+                    marketValue,
+                    averageCost,
+                    unrealizedPNL,
+                    realizedPNL,
+                    accountName
                 )
             );
         }

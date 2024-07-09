@@ -1,6 +1,5 @@
 ﻿using IBApi;
 using IBKRWrapper.Events;
-using IBKRWrapper.Models;
 
 namespace IBKRWrapper
 {
@@ -10,10 +9,7 @@ namespace IBKRWrapper
 
         public void position(string account, Contract contract, decimal pos, double avgCost)
         {
-            PositionEvent?.Invoke(
-                this,
-                new PositionEventArgs(new Position(account, contract, pos, avgCost))
-            );
+            PositionEvent?.Invoke(this, new PositionEventArgs(account, contract, pos, avgCost));
         }
 
         public event EventHandler? PositionEndEvent;
