@@ -116,6 +116,11 @@ namespace IBKRWrapper
             );
         }
 
+        public void reqIds(int numIds)
+        {
+            clientSocket.reqIds(numIds);
+        }
+
         public void reqMarketDataType(int marketDataType)
         {
             clientSocket.reqMarketDataType(marketDataType);

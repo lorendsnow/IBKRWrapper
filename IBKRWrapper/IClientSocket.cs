@@ -57,6 +57,7 @@ namespace IBKRWrapper
             bool ignoreSize,
             List<TagValue> miscOptions
         );
+        void reqIds(int numIds);
         void reqMarketDataType(int marketDataType);
         void reqMktData(
             int tickerId,
