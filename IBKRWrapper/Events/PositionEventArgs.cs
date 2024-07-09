@@ -1,9 +1,13 @@
-﻿using IBKRWrapper.Models;
+﻿using IBApi;
 
 namespace IBKRWrapper.Events
 {
-    public class PositionEventArgs(Position position) : EventArgs
+    public class PositionEventArgs(string account, Contract contract, decimal pos, double avgCost)
+        : EventArgs
     {
-        public Position Position { get; private set; } = position;
+        public string Account { get; } = account;
+        public Contract Contract { get; } = contract;
+        public decimal Position { get; } = pos;
+        public double AverageCost { get; } = avgCost;
     }
 }
