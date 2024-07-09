@@ -1,6 +1,4 @@
-﻿using IBApi;
-using IBKRWrapper.Events;
-using IBKRWrapper.Models;
+﻿using IBKRWrapper.Events;
 
 namespace SimpleBroker.EventHandlers
 {
@@ -252,7 +250,21 @@ namespace SimpleBroker.EventHandlers
 
         internal static EventHandler<PositionEventArgs> PositionHandler(List<Position> positions)
         {
-            return (sender, e) => positions.Add(e.Position.ToBrokerPosition());
+            return (sender, e) =>
+                positions.Add(
+                    new Position()
+                    {
+                        ConId = e.Contract.ConId,
+                        Symbol = e.Contract.Symbol,
+                        SecType = e.Contract.SecType,
+                        Exchange = e.Contract.Exchange,
+                        Currency = e.Contract.Currency,
+                        PrimaryExch = e.Contract.PrimaryExch,
+                        Positions = e.Position,
+                        AvgCost = e.AverageCost,
+                        Account = e.Account
+                    }
+                );
         }
 
         internal static EventHandler PositionEndHandler(
@@ -291,7 +303,23 @@ namespace SimpleBroker.EventHandlers
             List<PortfolioPosition> positions
         )
         {
-            return (sender, e) => positions.Add(e.Position.ToBrokerPortfolioPosition());
+            return (sender, e) =>
+                positions.Add(
+                    new()
+                    {
+                        Ticker = e.Contract.Symbol,
+                        SecType = e.Contract.SecType,
+                        Exchange = e.Contract.Exchange,
+                        PrimaryExch = e.Contract.PrimaryExch,
+                        Quantity = e.Position,
+                        MarketPrice = e.MarketPrice,
+                        MarketValue = e.MarketValue,
+                        AverageCost = e.AverageCost,
+                        UnrealizedPNL = e.UnrealizedPNL,
+                        RealizedPNL = e.RealizedPNL,
+                        Account = e.Account
+                    }
+                );
         }
     }
 }
