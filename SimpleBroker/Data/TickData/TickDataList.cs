@@ -25,7 +25,16 @@ namespace SimpleBroker
         /// <summary>
         /// Emits a new tick upon receipt.
         /// </summary>
-        public virtual event EventHandler<NewTickEventArgs<T>>? NewTickEvent;
+        public event EventHandler<NewTickEventArgs<T>>? NewTickEvent;
+
+        /// <summary>
+        /// Overridable method to handle new ticks.
+        /// </summary>
+        /// <param name="e"></param>
+        protected virtual void OnNewTickEvent(NewTickEventArgs<T> e)
+        {
+            NewTickEvent?.Invoke(this, e);
+        }
 
         /// <summary>
         /// Cancels the tick data subscription.
@@ -45,7 +54,7 @@ namespace SimpleBroker
             return (
                 $"TickDataList(ReqId={ReqId}, "
                 + $"Contract={ContractString(Contract)}, "
-                + $"Data=[{string.Join(", ", Data.Select(x => x.ToString()).ToArray())}])"
+                + $"Data=[{string.Join(", ", Data.Select(x => x?.ToString()).ToArray())}])"
             );
         }
 

@@ -8,11 +8,6 @@ namespace SimpleBroker
     public class TickMidDataList : TickDataList<TickMid>
     {
         /// <summary>
-        /// Emits a new tick upon receipt.
-        /// </summary>
-        public override event EventHandler<NewTickEventArgs<TickMid>>? NewTickEvent;
-
-        /// <summary>
         /// Receives and handles new ticks from IBKR
         /// </summary>
         /// <param name="sender"></param>
@@ -28,7 +23,7 @@ namespace SimpleBroker
                     Price = e.MidPoint,
                 };
 
-            NewTickEvent?.Invoke(this, new NewTickEventArgs<TickMid>(tick));
+            OnNewTickEvent(new(tick));
 
             Data.Add(tick);
         }

@@ -8,11 +8,6 @@ namespace SimpleBroker
     public class TickBidAskDataList : TickDataList<TickBidAsk>
     {
         /// <summary>
-        /// Emits a new tick upon receipt.
-        /// </summary>
-        public override event EventHandler<NewTickEventArgs<TickBidAsk>>? NewTickEvent;
-
-        /// <summary>
         /// Receives and handles new ticks from IBKR
         /// </summary>
         /// <param name="sender"></param>
@@ -34,7 +29,7 @@ namespace SimpleBroker
                         ?? throw new Exception("Args didn't include the tickattribute"),
                 };
 
-            NewTickEvent?.Invoke(this, new NewTickEventArgs<TickBidAsk>(tick));
+            OnNewTickEvent(new(tick));
 
             Data.Add(tick);
         }

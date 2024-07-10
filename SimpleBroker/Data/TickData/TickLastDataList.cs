@@ -8,11 +8,6 @@ namespace SimpleBroker
     public class TickLastDataList : TickDataList<TickLast>
     {
         /// <summary>
-        /// Emits a new tick upon receipt.
-        /// </summary>
-        public override event EventHandler<NewTickEventArgs<TickLast>>? NewTickEvent;
-
-        /// <summary>
         /// Receives and handles new ticks from IBKR
         /// </summary>
         /// <param name="sender"></param>
@@ -34,7 +29,7 @@ namespace SimpleBroker
                     SpecialConditions = e.SpecialConditions
                 };
 
-            NewTickEvent?.Invoke(this, new NewTickEventArgs<TickLast>(tick));
+            OnNewTickEvent(new(tick));
 
             Data.Add(tick);
         }
