@@ -1790,59 +1790,21 @@ namespace SimpleBroker
         /// <summary>
         /// Request a market scan from IBKR
         /// </summary>
-        /// <param name="instrument">
-        ///     <para>Instrument type to use</para>
-        ///     <list type="table">
-        ///         <listheader><description>Instrument Type Definitions:</description></listheader>
-        ///         <item>
-        ///             <term>STK</term><description> Stock or ETF</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>OPT</term><description> Option</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>FUT</term><description> Future</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>IND</term><description> Index</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>FOP</term><description> Futures Option</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>CASH</term><description> Forex Pair</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>BAG</term><description> Combo</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>WAR</term><description> Warrant</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>BOND</term><description> Bond</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>CMDTY</term><description> Commodity</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>NEWS</term><description> News</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>FUND</term><description> Mutual Fund</description>
-        ///         </item>
-        ///     </list>
+        /// <param name="subscription">
+        ///     A <see cref="ScannerSubscription"/> object, which holds scanner param values
         /// </param>
-        /// <param name="location">Country or region for scanner to search</param>
-        /// <param name="scanCode">Value for scanner to sort by</param>
         /// <param name="filterOptions">Filter option key/value pairs to use in the scanner</param>
-        /// <returns>A <see cref="ScannerData"/> object which receives and stores the results sent by IBKR</returns>
+        /// <returns>
+        ///     A <see cref="ScannerData"/> object which receives and stores the results sent by
+        ///     IBKR
+        /// </returns>
         /// <remarks>
-        ///     For more information on how to construct scanner requests, see IBKR's documentation at <see href="https://ibkrcampus.com/ibkr-api-page/twsapi-doc/#market-scanner"/>
+        ///     For more information on how to construct scanner requests, see IBKR's
+        ///     documentation at
+        ///     <see href="https://ibkrcampus.com/ibkr-api-page/twsapi-doc/#market-scanner"/>
         /// </remarks>
         public ScannerData GetScannerData(
-            string instrument,
-            string location,
-            string scanCode,
+            ScannerSubscription subscription,
             List<TagValue>? filterOptions
         )
         {
@@ -1852,20 +1814,19 @@ namespace SimpleBroker
                 reqId = _wrapper.ReqId++;
             }
 
-            ScannerSubscription scannerSub = Wrapper.MakeScannerSubscription(
-                instrument,
-                location,
-                scanCode
-            );
-
             List<IBApi.TagValue> tagValues =
                 filterOptions?.Select(x => x.ToIBKRTagValue()).ToList() ?? [];
 
-            ScannerData scannerData = new(reqId, scannerSub, tagValues);
+            ScannerData scannerData = new(reqId, subscription, filterOptions ?? []);
             _wrapper.ScannerDataEvent += scannerData.HandleScannerData;
             _wrapper.ScannerDataEndEvent += scannerData.HandleScannerDataEnd;
 
-            _wrapper.ClientSocket.reqScannerSubscription(reqId, scannerSub, [], tagValues);
+            _wrapper.ClientSocket.reqScannerSubscription(
+                reqId,
+                subscription.ToIBKRScannerSubscription(),
+                [],
+                tagValues
+            );
 
             return scannerData;
         }
@@ -1883,7 +1844,8 @@ namespace SimpleBroker
         #endregion
 
         /// <summary>
-        /// Internal method to create a new instance of the <see cref="Broker"/> class with an external <see cref="Wrapper"/> instance for testing/mocking purposes.
+        /// Internal method to create a new instance of the <see cref="Broker"/> class with an
+        /// external <see cref="Wrapper"/> instance for testing/mocking purposes.
         /// </summary>
         /// <param name="wrapper"></param>
         /// <returns>A new <see cref="Broker"/> instance</returns>
