@@ -43,9 +43,12 @@ namespace SimpleBroker
         /// <summary>
         /// Initiates a connection to the IBKR TWS/Gateway.
         /// </summary>
-        /// <param name="host"></param>
-        /// <param name="port"></param>
-        /// <param name="clientId"></param>
+        /// <param name="host">IP address where the TWS/Gateway is running</param>
+        /// <param name="port">TWS/Gateway port</param>
+        /// <param name="clientId">
+        ///     Client ID to use for the session. Typically, "0" is the master client ID that can 
+        ///     see/manipulate all orders and other actions performed by other client IDs.
+        /// </param>
         public void Connect(string host, int port, int clientId)
         {
             _wrapper.Connect(host, port, clientId);
