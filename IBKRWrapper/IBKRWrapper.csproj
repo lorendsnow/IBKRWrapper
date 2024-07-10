@@ -5,7 +5,25 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x86</Platforms>
+    <Title>IBKR Wrapper</Title>
+    <Version>0.1.0</Version>
+    <Authors>Loren Snow</Authors>
+    <Description>Partial implementation of the Interactive Brokers EWrapper class</Description>
+    <Copyright>Copyright (c) Loren Snow 2024</Copyright>
+    <PackageProjectUrl>https://github.com/lorendsnow/IBKRWrapper</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/lorendsnow/IBKRWrapper</RepositoryUrl>
+    <RepositoryType>Github</RepositoryType>
+    <PackageTags>EWrapper; Interactive Brokers; IBKR</PackageTags>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="CSharpAPI">
