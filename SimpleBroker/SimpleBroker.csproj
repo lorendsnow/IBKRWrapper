@@ -5,12 +5,33 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<PackageId>SimpleInteractiveBroker</PackageId>
+	<Title>Simple Interactive Broker</Title>
+	<Version>0.1.0</Version>
+	<Authors>Loren Snow</Authors>
+	<Company />
+	<Description>Simple API to access your Interactive Brokers account programatically</Description>
+	<Copyright>Copyright (c) Loren Snow 2024</Copyright>
+	<PackageProjectUrl>https://github.com/lorendsnow/IBKRWrapper</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/lorendsnow/IBKRWrapper</RepositoryUrl>
+	<RepositoryType>Github</RepositoryType>
+	<PackageTags>Interactive Brokers; IBKR; Algorithmic Trading; Wrapper; TWS API</PackageTags>
+	<PackageReleaseNotes>Initial release</PackageReleaseNotes>
+	<NeutralLanguage>en-US</NeutralLanguage>
+	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="SimpleBroker.Tests\**" />
     <EmbeddedResource Remove="SimpleBroker.Tests\**" />
     <None Remove="SimpleBroker.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
