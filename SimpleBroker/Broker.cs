@@ -2,7 +2,6 @@
 using IBKRWrapper;
 using IBKRWrapper.Constants;
 using IBKRWrapper.Events;
-using IBKRWrapper.Models;
 using SimpleBroker.EventHandlers;
 using SimpleBroker.LockObjects;
 
@@ -1684,8 +1683,6 @@ namespace SimpleBroker
                     orderId = _wrapper.NextOrderId++;
                 }
             }
-
-            Console.WriteLine($"Order ID: {orderId}");
 
             Trade trade = Trade.New(orderId, contract, order);
 
