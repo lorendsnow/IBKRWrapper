@@ -1,6 +1,6 @@
 # IBKRWrapper
 
-IBKRWrapper is two projects in one, aiming to make using the Interactive Brokers easier in C#/dotnet. IBKRWrapper is an event-based partial implementation of the Interactive Brokers API, and SimpleBroker uses IBKRWrapper to expose a simple and easy to use public API. You can use IBKRWrapper as a starting point to implement your own custom API, or just use SimpleBroker as a "batteries-included" API to begin using the Interactive Brokers API immediately.
+IBKRWrapper is two projects in one, and aims to make it easier to use Interactive Brokers in C#/dotnet. IBKRWrapper is an event-based partial implementation of the Interactive Brokers API, and SimpleBroker uses IBKRWrapper to expose a simple and easy-to-use public API. You can use IBKRWrapper as a starting point to implement your own custom API, or just use SimpleBroker as a "batteries-included" API to begin using the Interactive Brokers API immediately.
 
 A few caveats and things you should know before using:
 
@@ -58,3 +58,8 @@ namespace YourProgram
 ## IBKRWrapper
 
 IBKRWrapper partially implements Interactive Brokers' EWrapper class, with the implemented methods generally triggering events which emit the values sent to the method by IBKR.
+
+### License
+
+Copyright © 2024 [Loren Snow](https://github.com/lorendsnow)
+This project is [MIT](https://github.com/lorendsnow/IBKRWrapper/blob/master/LICENSE.txt) licensed.
