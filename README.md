@@ -34,7 +34,7 @@ namespace YourProgram
             Contract contract = new("MSFT", "STK", "USD", "SMART");
 
             // Get historical bars for MSFT
-            List<Bar> = await broker.GetHistoricalBars(contract, "1 Y", "1 day", "TRADES");
+            List<Bar> bars = await broker.GetHistoricalBars(contract, "1 Y", "1 day", "TRADES");
 
             // Make and place a market order for 100 shares of MSFT
             MarketOrder order = new("BUY", "DAY", "U123456", 100);
