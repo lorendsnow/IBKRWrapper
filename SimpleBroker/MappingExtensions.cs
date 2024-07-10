@@ -586,5 +586,35 @@ namespace SimpleBroker
                 AskPastHigh = tickAttribLast.AskPastHigh
             };
         }
+
+        internal static IBApi.ScannerSubscription ToIBKRScannerSubscription(
+            this ScannerSubscription sub
+        )
+        {
+            return new()
+            {
+                NumberOfRows = sub.NumberOfRows,
+                Instrument = sub.Instrument,
+                LocationCode = sub.LocationCode,
+                ScanCode = sub.ScanCode,
+                AbovePrice = sub.AbovePrice,
+                BelowPrice = sub.BelowPrice,
+                AboveVolume = sub.AboveVolume,
+                AverageOptionVolumeAbove = sub.AverageOptionVolumeAbove,
+                MarketCapAbove = sub.MarketCapAbove,
+                MarketCapBelow = sub.MarketCapBelow,
+                MoodyRatingAbove = sub.MoodyRatingAbove,
+                MoodyRatingBelow = sub.MoodyRatingBelow,
+                SpRatingAbove = sub.SpRatingAbove,
+                SpRatingBelow = sub.SpRatingBelow,
+                MaturityDateAbove = sub.MaturityDateAbove,
+                MaturityDateBelow = sub.MaturityDateBelow,
+                CouponRateAbove = sub.CouponRateAbove,
+                CouponRateBelow = sub.CouponRateBelow,
+                ExcludeConvertible = sub.ExcludeConvertible,
+                ScannerSettingPairs = sub.ScannerSettingPairs,
+                StockTypeFilter = sub.StockTypeFilter,
+            };
+        }
     }
 }
