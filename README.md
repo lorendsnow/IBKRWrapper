@@ -62,4 +62,5 @@ IBKRWrapper partially implements Interactive Brokers' EWrapper class, with the i
 ### License
 
 Copyright © 2024 [Loren Snow](https://github.com/lorendsnow)
+
 This project is [MIT](https://github.com/lorendsnow/IBKRWrapper/blob/master/LICENSE.txt) licensed.
