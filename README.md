@@ -8,7 +8,9 @@ A few caveats and things you should know before using:
 - I generally trade US equities and options, so I haven't done any testing using foreign currencies, futures, bonds, etc.
 - Interactive Brokers doesn't have a test API, so my testing is limited to what I can do in my personal and paper trading accounts.
 
-If you're not already familiar with the underlying IBKR API, it would be worth spending some time looking through their [API documentation](https://ibkrcampus.com/ibkr-api-page/twsapi-doc/)
+If you're not already familiar with the underlying IBKR API, it would be worth spending some time looking through their [API documentation](https://ibkrcampus.com/ibkr-api-page/twsapi-doc/).
+
+Both of [SimpleBroker](https://www.nuget.org/packages/SimpleInteractiveBroker) and [IBKRWrapper](https://www.nuget.org/packages/IBKRWrapper/) are published on NuGet.
 
 ## SimpleBroker
 
