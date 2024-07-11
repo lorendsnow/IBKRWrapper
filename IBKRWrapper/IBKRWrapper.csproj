@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x86</Platforms>
     <Title>IBKR Wrapper</Title>
-    <Version>0.1.0</Version>
+    <Version>0.1.2</Version>
     <Authors>Loren Snow</Authors>
     <Description>Partial implementation of the Interactive Brokers EWrapper class</Description>
     <Copyright>Copyright (c) Loren Snow 2024</Copyright>
@@ -16,6 +16,7 @@
     <PackageTags>EWrapper; Interactive Brokers; IBKR</PackageTags>
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,8 +28,22 @@
 
   <ItemGroup>
     <Reference Include="CSharpAPI">
-      <HintPath>..\..\..\..\..\..\TWS API\source\CSharpClient\client\bin\Debug\netstandard2.0\CSharpAPI.dll</HintPath>
+      <HintPath>CSharpAPI.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="CSharpApi.dll">
+	  <Pack>True</Pack>
+	  <PackagePath>lib\net8.0</PackagePath>
+	</Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -4,21 +4,22 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-	<PackageId>SimpleInteractiveBroker</PackageId>
-	<Title>Simple Interactive Broker</Title>
-	<Version>0.1.0</Version>
-	<Authors>Loren Snow</Authors>
-	<Company />
-	<Description>Simple API to access your Interactive Brokers account programatically</Description>
-	<Copyright>Copyright (c) Loren Snow 2024</Copyright>
-	<PackageProjectUrl>https://github.com/lorendsnow/IBKRWrapper</PackageProjectUrl>
-	<RepositoryUrl>https://github.com/lorendsnow/IBKRWrapper</RepositoryUrl>
-	<RepositoryType>Github</RepositoryType>
-	<PackageTags>Interactive Brokers; IBKR; Algorithmic Trading; Wrapper; TWS API</PackageTags>
-	<PackageReleaseNotes>Initial release</PackageReleaseNotes>
-	<NeutralLanguage>en-US</NeutralLanguage>
-	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>SimpleInteractiveBroker</PackageId>
+    <Title>Simple Interactive Broker</Title>
+    <Version>0.1.3</Version>
+    <Authors>Loren Snow</Authors>
+    <Company />
+    <Description>Simple API to access your Interactive Brokers account programatically</Description>
+    <Copyright>Copyright (c) Loren Snow 2024</Copyright>
+    <PackageProjectUrl>https://github.com/lorendsnow/IBKRWrapper</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/lorendsnow/IBKRWrapper</RepositoryUrl>
+    <RepositoryType>Github</RepositoryType>
+    <PackageTags>Interactive Brokers; IBKR; Algorithmic Trading; Wrapper; TWS API</PackageTags>
+    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,8 +41,22 @@
 
   <ItemGroup>
     <Reference Include="CSharpAPI">
-      <HintPath>..\IBKRWrapper\bin\Release\net8.0\CSharpAPI.dll</HintPath>
+      <HintPath>CSharpAPI.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="CSharpApi.dll">
+      <Pack>True</Pack>
+      <PackagePath>lib\net8.0</PackagePath>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
