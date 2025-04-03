@@ -2,7 +2,7 @@
 {
     public interface IClientMsgSink
     {
-        void serverVersion(int version, string time);
-        void redirect(string host);
+        void ServerVersion(int version, string time);
+        void Redirect(string host);
     }
 }
